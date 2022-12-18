@@ -1,0 +1,127 @@
+这道题给了一个 9x9 的二维数组， 其中包含了 1-9 的数字 和 0，
+让我们填充所有 0 位置上的数字 使得 这个二维数组满足 sudoku 规则
+
+sudoku 规则是说 同一行中不能出现 重复的 数字（必须由1-9的数字组成每个数字只能使用一次）
+同一列也不能出现重复的数字
+
+在同一个 九宫格中也不能出现重复的数字
+
+
+使用递归的思想，遍历每一个二维数组的 0 的位置，使用 for 循环 在这个位置上分别添加 1-9 的数字，添加一个数字就进入下一个循环看看添加这个数字能否指引我们找到
+一个合适的结果，如果不能则将这个添加的数字还原为 0
+
+
+
+{
+"board": [
+[8, 4, 9,| 0, 0, 3,| 5, 7, 0],
+[0, 1, 0,| 0, 0, 0,| 0, 0, 0],
+[7, 0, 0,| 0, 9, 0,| 0, 8, 3],
+-----------------------------
+[0, 0, 0,| 9, 4, 6,| 7, 0, 0],
+[0, 8, 0,| 0, 5, 0,| 0, 4, 0],
+[0, 0, 6,| 8, 7, 2,| 0, 0, 0],
+-----------------------------
+[5, 7, 0,| 0, 1, 0,| 0, 0, 4],
+[0, 0, 0,| 0, 0, 0,| 0, 1, 0],
+[0, 2, 1,| 7, 0, 0,| 8, 6, 5]
+------------------------------
+]
+}
+Output:
+
+[
+[8, 4, 9, 1, 6, 3, 5, 7, 2],
+[3, 1, 5, 2, 8, 7, 4, 9, 6],
+[7, 6, 2, 4, 9, 5, 1, 8, 3],
+[1, 5, 3, 9, 4, 6, 7, 2, 8],
+[2, 8, 7, 3, 5, 1, 6, 4, 9],
+[4, 9, 6, 8, 7, 2, 3, 5, 1],
+[5, 7, 8, 6, 1, 9, 2, 3, 4],
+[6, 3, 4, 5, 2, 8, 9, 1, 7],
+[9, 2, 1, 7, 3, 4, 8, 6, 5]
+]
+
+以下是代码：使用 数组的好处是 可以跨境进行index，list 需要一个一个遍历
+
+   static int[][] grid;
+    static ArrayList<ArrayList<Integer>> solve_sudoku_puzzle(ArrayList<ArrayList<Integer>> board) {
+        // Write your code here.
+        grid = new int[9][9];
+
+        for(int i = 0;i<9;i++){
+            for(int j = 0;j<9;j++){
+                Integer num = board.get(i).get(j);
+                grid[i][j] = num;
+            }
+        }
+
+        helper(0,0);
+
+        for(int i = 0;i<9;i++){
+            for(int j = 0;j<9;j++){
+                if(board.get(i).get(j)!=0){continue;}
+                board.get(i).set(j,grid[i][j]);
+            }
+        }
+
+        // for(int i = 0;i<9;i++){
+        //     System.out.println("\n");
+        //     for(int j = 0;j<9;j++){
+        //         System.out.print(grid[i][j] + ",");
+        //     }
+        // }
+        return board;
+    }
+
+    static Boolean helper(int x, int y){
+        if(y==9){return helper(x+1,0);}
+        if(x==9){return true;}
+        if(grid[x][y]!=0){
+            return helper(x,y+1);
+        }
+
+        for(int k = 1;k<=9;k++){
+            if(!isValid(x,y,k)){
+                continue;
+            }
+            grid[x][y] = k;
+            if(helper(x,y+1) == true){
+                return true;
+            }
+            grid[x][y] = 0;
+        }
+        return false;
+    }
+
+    static Boolean isValid(int x, int y, int k){
+
+        // check same row
+        for(int j = 0;j<9;j++){
+            if(grid[x][j]-k==0){
+                return false;
+            }
+        }
+
+        // check same col
+        for(int i = 0;i<9;i++){
+            if(grid[i][y]-k==0){
+                return false;
+            }
+        }
+
+        //注意这里寻找的是 x 和 y 所在的九宫格的左上角坐标，注意要 *3，因为x/3 只是找到了在第几个九宫格，并不是左上角的实际坐标
+        int startX = (int)x/3*3;
+        int startY = (int)y/3*3;
+
+        for(int i = 0;i<3;i++){
+            for(int j = 0;j<3;j++){
+                if(grid[startX+i][startY+j]-k==0){
+                    return false;
+                }
+            }
+        }
+        return true;
+    }
+
+
