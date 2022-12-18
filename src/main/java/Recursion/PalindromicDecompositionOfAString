@@ -1,0 +1,167 @@
+
+这道题给了一个字符串，让我们在每个字母之间插杠，使得每个杠之间所组成的都是 回文
+
+这道题天真点的想法是，每个字母之间都插入杠或者空，把所有的可能的情况都列举出来然后判断 每个杠之间的字符串是否为 palindrome
+
+另一种想法是使用一个 variable 叫做 last string，last string 代表的意义是 当前还没有被插杠的 string，也就是说当前的没有被插杠的string还是有可能组成
+回文
+
+使用循环的写法，使用一个 start 来记录当前遍历到的字母的位置
+
+
+
+Example:
+
+{
+"s": "abracadabra"
+}
+
+output:
+
+["a|b|r|a|c|ada|b|r|a", "a|b|r|aca|d|a|b|r|a", "a|b|r|a|c|a|d|a|b|r|
+
+
+    static ArrayList<String> res;
+    static ArrayList<String> generate_palindromic_decompositions(String s) {
+        // Write your code here.
+        res = new ArrayList<String>();
+        if(s.length()==0){
+            return res;
+        }
+        StringBuilder sb = new StringBuilder();
+        sb.append(s.charAt(0));
+        helper(s,1,sb,""+s.charAt(0));
+        return res;
+    }
+
+    static void helper(String s, int start, StringBuilder sb, String lastString ){
+        if(start - s.length()==0){
+            if(isPalindrome(lastString)){
+                res.add(new String(sb));
+            }
+            return;
+        }
+
+        sb.append(s.charAt(start));
+        helper(s,start+1,sb,lastString+s.charAt(start));
+        sb.deleteCharAt(sb.length()-1);
+
+        // backtracking 剪枝，只有上一个循环来的 last string 为回文，我们才进行插杠的操作
+        if(!isPalindrome(lastString)){
+            return;
+        }
+
+        sb.append('|');
+        sb.append(s.charAt(start));
+        lastString = String.valueOf(s.charAt(start));
+        helper(s,start+1,sb,lastString);
+
+        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length()-1);
+
+        return;
+    }
+
+    static Boolean isPalindrome(String s){
+        int i = 0;
+        int j = s.length()-1;
+
+        while(i<j){
+            if(s.charAt(i)-s.charAt(j)!=0){
+                return false;
+            }
+            i++;j--;
+        }
+        return true;
+    }
+
+
+// 下面展示一下 运算的过程中 stringbuilder 变量
+
+a
+ab
+abr
+abra
+abrac
+abraca
+abracad
+abracada
+abracadab
+abracadabr
+abracadabra
+a|b
+a|br
+a|bra
+a|brac
+a|braca
+a|bracad
+a|bracada
+a|bracadab
+a|bracadabr
+a|bracadabra
+a|b|r
+a|b|ra
+a|b|rac
+a|b|raca
+a|b|racad
+a|b|racada
+a|b|racadab
+a|b|racadabr
+a|b|racadabra
+a|b|r|a
+a|b|r|ac
+a|b|r|aca
+a|b|r|acad
+a|b|r|acada
+a|b|r|acadab
+a|b|r|acadabr
+a|b|r|acadabra
+a|b|r|aca|d
+a|b|r|aca|da
+a|b|r|aca|dab
+a|b|r|aca|dabr
+a|b|r|aca|dabra
+a|b|r|aca|d|a
+a|b|r|aca|d|ab
+a|b|r|aca|d|abr
+a|b|r|aca|d|abra
+a|b|r|aca|d|a|b
+a|b|r|aca|d|a|br
+a|b|r|aca|d|a|bra
+a|b|r|aca|d|a|b|r
+a|b|r|aca|d|a|b|ra
+a|b|r|aca|d|a|b|r|a
+a|b|r|a|c
+a|b|r|a|ca
+a|b|r|a|cad
+a|b|r|a|cada
+a|b|r|a|cadab
+a|b|r|a|cadabr
+a|b|r|a|cadabra
+a|b|r|a|c|a
+a|b|r|a|c|ad
+a|b|r|a|c|ada
+a|b|r|a|c|adab
+a|b|r|a|c|adabr
+a|b|r|a|c|adabra
+a|b|r|a|c|ada|b
+a|b|r|a|c|ada|br
+a|b|r|a|c|ada|bra
+a|b|r|a|c|ada|b|r
+a|b|r|a|c|ada|b|ra
+a|b|r|a|c|ada|b|r|a
+a|b|r|a|c|a|d
+a|b|r|a|c|a|da
+a|b|r|a|c|a|dab
+a|b|r|a|c|a|dabr
+a|b|r|a|c|a|dabra
+a|b|r|a|c|a|d|a
+a|b|r|a|c|a|d|ab
+a|b|r|a|c|a|d|abr
+a|b|r|a|c|a|d|abra
+a|b|r|a|c|a|d|a|b
+a|b|r|a|c|a|d|a|br
+a|b|r|a|c|a|d|a|bra
+a|b|r|a|c|a|d|a|b|r
+a|b|r|a|c|a|d|a|b|ra
+a|b|r|a|c|a|d|a|b|r|a
