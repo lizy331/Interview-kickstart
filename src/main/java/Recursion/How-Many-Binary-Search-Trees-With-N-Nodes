@@ -1,0 +1,106 @@
+这道题给了一个数字 n 问我们能够组成多少种不同的 binary search tree， BST 注意它的特性，左枝比root 小，右枝所有数字都比root 大
+
+Example One:
+{
+"n": 1
+}
+Output:
+
+1
+
+
+Example Two
+{
+"n": 2
+}
+Output:
+
+2
+
+
+Suppose the values are 1 and 2, then the two trees that are possible are
+
+   (2)            (1)
+  /       and       \
+(1)                  (2)
+
+
+Example Three
+{
+"n": 3
+}
+Output:
+5
+
+
+Suppose the values are 1, 2, 3 then the possible trees are
+
+       (3)
+      /
+    (2)
+   /
+(1)
+
+   (3)
+  /
+(1)
+   \
+   (2)
+
+(1)
+   \
+    (2)
+      \
+       (3)
+
+(1)
+   \
+    (3)
+   /
+(2)
+
+   (2)
+  /   \
+(1)    (3)
+
+
+那么 我们从 1 到 n 中让每个数字都做一次 root 然后把他们全部加起来就是最后的答案
+
+对于每一个 数字 比如 n = 5，3 作为 root
+
+那么3 作为 root 的左枝 可以选择的数字 只有 1 和 2，右枝 只有 4 和 5，这是由于 BST 的特性
+
+ [1,2]  ,3,  [4,5]
+
+ 所以当一个数字作为 root 其左枝可以选择的数字为 i-1，右枝可选择的数字数量为 n-i
+
+
+
+ 以下是代码：我们不断调用主方程，停止条件是 当 n 减小到 1 或者 0，0 也有一种选择 即root本身作为 tree
+
+
+ 
+
+     static Long how_many_bsts(Integer n) {
+         // Write your code here.
+         if(n == 1 || n == 0){
+             return 1L;
+         }
+         long res = 0;
+         for(int i = 1;i<=n;i++){
+             res += how_many_bsts(i-1) * how_many_bsts(n-i);
+         }
+         return res;
+     }
+
+
+     // 1,2,3
+
+     // 1*2 = 2
+     // 1*1 = 1
+     // 2*1 = 2
+
+
+     // 1,2
+     // 1*1 = 1
+     // 1
