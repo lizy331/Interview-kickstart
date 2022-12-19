@@ -1,0 +1,106 @@
+这道题给了一个字符串和一个数字 target，问我们这个字符串中的数字能否通过 加和乘来组成 target 数字
+
+可以把这种题相乘填空题，类似于 PalindromicDecompositionOfAString，字符串长度为 n 的数字，中间的间隙位置为 n-1个
+那么 每一个间隙我们有三种选择 1.什么也不填 2.填+号 3.填乘号*
+这样下来我们可以组成一个 三叉树，这个 三叉树的 leaf node 就会有 3^(n-1) 个 （n-1代表间隙的位置）
+
+那么时间复杂度就会是 3^n (实际上是 n*3^(n-1),n是来copy 我们的 out 所需要时间)
+
+Example
+{
+"s": "202",
+"target": 4
+}
+Output:
+
+["2+0+2", "2+02", "2*02"]
+Same three strings in any other order are also a correct output.
+
+
+   static ArrayList<String> res;
+    static Long t;
+
+    static ArrayList<String> generate_all_expressions(String s, Long target) {
+        // Write your code here.
+        res = new ArrayList<>();
+        t = target;
+        StringBuilder sb = new StringBuilder();
+        sb.append(s.charAt(0));
+        helper(s,1,sb, 0L,1L,(long)s.charAt(0)-'0');
+
+        return res;
+    }
+
+    static void helper(String s,int start, StringBuilder sb, long sum, long product, long cur){
+        if(start - s.length()==0){
+            if(sum + product*cur == t){
+                res.add(new String(sb));
+            }
+            return;
+        }
+
+        // concatenation
+        sb.append(s.charAt(start));
+        helper(s,start+1,sb,sum,product,cur*10 + (s.charAt(start)-'0'));
+        sb.deleteCharAt(sb.length()-1);
+
+
+        // using +
+        sb.append('+');
+        sb.append(s.charAt(start));
+        helper(s,start+1,sb,sum+cur*product,1,(s.charAt(start)-'0'));
+        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length()-1);
+
+
+        // using *
+        sb.append('*');
+        sb.append(s.charAt(start));
+        helper(s,start+1,sb,sum,cur*product,(s.charAt(start)-'0'));
+        sb.deleteCharAt(sb.length()-1);
+        sb.deleteCharAt(sb.length()-1);
+    }
+
+
+    实际上这个 算法是先进行拼接，然后往回进行 添加 + 或者 *，也就是 我们先拼接 2->20->202，然后 202 -> 20+2, 20*2 -> 2+0...
+    这个过程叫做 backtracking 回溯算法
+
+    之前我们做的 PalindromicDecompositionOfAString 也是使用了 回溯算法，先进行拼接，然后回溯
+
+
+    在进行添加 + 号的时候 当前的 cur 还没有被加入到 sum 中去
+    也就是 当前循环总是处在一个 (x+....=sum) ? cur*product 的公式中
+    如果我们添加 +  则 sum = sum + cur*product, cur = s.charAt(start)
+
+    注意这里 start 所指的 char 并不是当前的 cur，而是下一个循环的 cur，当前的 cur 是来自上一个循环使用的（可能使用 concatenation，加号，乘号） char
+    所以当前循环的 cur 还没有被加到 sum 当中去，那么为什么要 乘以 product
+
+    想象一下 () + ()
+    和      () * ()
+    我们不在乎左右两边括号内是什么，我们现在要在间隙中 添加 + 号 但是我们不知道左边的括号是不是还有  * 号
+    比如
+    ....()*()+()
+
+    所以我们必须把左边括号的乘法给记录下来（如果有则记录如果没有 则为 1），这也就是 product 的作用
+    即
+    product*() + ()
+
+    当我们添加乘号的时候 我们实际上只对 product 进行修改
+    product = product * ()
+    sum = product*() ? ()
+
+    以下是 input "202", target = 4 的 StringBuilder sb 变量的变化
+
+    2
+    20
+    202
+    20+2
+    20*2
+    2+0
+    2+02
+    2+0+2
+    2+0*2
+    2*0
+    2*02
+    2*0+2
+    2*0*2
