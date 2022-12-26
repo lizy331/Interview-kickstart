@@ -92,3 +92,9 @@ Output:
 
 以上写法是使用 for loop 在 helper function 中，注意由于使用 for 循环，start 有可能不能达到 string length，所以我们无论如何都要进行 对 sb 的添加
 **跳针的操作应该在 for loop 之内，并且要在 string builder  移除最后添加的字母之后进行**
+
+**时间复杂度 O(n*2^n)** 
+
+注意这里的 n 指的是 unique number of characters
+
+**空间复杂度 O(n)**
