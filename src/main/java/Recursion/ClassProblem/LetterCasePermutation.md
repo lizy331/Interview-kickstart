@@ -56,6 +56,8 @@ return res;
 
 **注意 使用 for loop 的时候注意 recursive call 要使用 i + 1，而并不是 start + 1，因为 start 是死的， i 可以进入下一个循环**
 
+permutation 的 start 实际上是 fixed index，combination 才是真正的 start（也就是说combination中 我们需要从 start 往后筛选数字），而在 permutation 中 是按照 fixed index 来进行循环的， fixed index = 0 ， fixed index = 1， fixed index = 2 以此类推
+
 **时间复杂度 O(n*2^n)**
 
 只需要考虑 worst case，worst case 就是 所有的位置都是字母，这样我们就相当于二叉树，每个 node 都有两种选择
