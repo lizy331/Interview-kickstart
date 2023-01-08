@@ -110,3 +110,22 @@ Tree Foundations
       postorder 遍历顺序 **左右中**
 
       注意如果一个 tree 是 BST的话，那么 中序遍历 inorder traversal 将会得到 按照从小到大顺序排列的 node
+
+        preorder 的意思是中间的 node 会 pre 与左右子枝 即 **中左右**
+        
+        inorder 意思是中间的 node 会在 左枝 和 右枝的中间被访问 **左中右**
+
+        postorder 意思是 中间的 node 会在 左枝和右枝 最后被访问 **左右中**
+
+
+16. 如果我们知道 一个 tree 的 preorder，或者 inorder 或者 postorder 我们能否重建 这个tree？
+    
+    如果已知我们的 tree 是 BST那么 我们只需要知道 preorder或者 postorder 就可以重建整个 tree
+
+    如果不知道这个tree 是否是 BST 仅仅知道 一个 preorder 或者 inorder 或者 postorder 是远远不够的，我们必须知道 inorder + preorder 或者 inorder + postorder
+    这是因为 inorder 提供了左右枝有哪些 node， preorder 提供了 root node 的位置信息 
+    
+    但是 preorder + postorder 是不够重建一个 非 BST tree 的
+
+
+17. 注意BFS 的时间复杂度和 DFS 的时间复杂度 是一样的，是 O(n) n 是 node 的数量，并不是 O(logn) logn 是 BST 的标准长度，但是并不是遍历所有 node 的时间复杂度 
