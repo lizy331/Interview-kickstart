@@ -40,6 +40,12 @@
     }
 }
 
+注意zigzag 只是影响了 我们如何将 数字添加到 out list 中，所以我们不需要改变添加到 deque array 中 node 的顺序
+
+当前 leve 是奇数的时候，比如 level 1 （注意 level 1 就是 root level，没有 level 0），在这个 level 我们需要将 node 从右到左添加，
+
+也就是使用 list.add(0,object) 用来 add to front
+
 
 使用 linked list 的性能要比使用 deque array 好
 
