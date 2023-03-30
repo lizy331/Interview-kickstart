@@ -18,7 +18,7 @@
 
 9. directed graph 中 sum of in-degree = sum of out-degree
 
-10. 什么是 Eulerian cycle，访问所有的 edge 而不重复访问任何一条 edge，最后返回到起始点
+10. **什么是 Eulerian cycle，访问所有的 edge 而不重复访问任何一条 edge，最后返回到起始点**
     什么是 Eulerian path，和 Eulerian cycle 类似，但是最后回到起始点
     
 
