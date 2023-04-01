@@ -47,6 +47,12 @@ class Solution{
 }
 ```
 
-注意 时间复杂度是 O(m+n), m = number of edges, m 来自于 sum of degree of all vertexes（因为对于每一个 vertex 我们都进行了 它的 degree 个数的操作，即 运行dfs function），实际上是 2m （sum of degree of all vertex = 2 * number of edges）
+注意 **时间复杂度是 O(m+n)**, m = number of edges, m 来自于 sum of degree of all vertexes（因为对于每一个 vertex 我们都进行了 它的 degree 个数的操作，即 运行dfs function），实际上是 2m （sum of degree of all vertex = 2 * number of edges）
 
 n 来自于 初始化 adjacency list 和 对于 每一个 vertex 的遍历
+
+在 DFS 中如果出现 back edge，说明 graph 有 cycle
+在 BFS 中如果出现 cross edge 说明 graph 具有 cycle，cross edge 存在于 同一个 layer 的两个 vertex 之间的联系
+
+
+**空间复杂度为 O(n)**, 由于 DFS 是 循环的 最差情况下，即一次 DFS 就发现了所有的 vertex，那么 循环中的 call stack 就会具有 所有的 vertexes
