@@ -1,7 +1,8 @@
 这道题让我们使用 BSF 搜索来遍历 BST
 
 
-
+```java
+class Solution{
     static ArrayList<ArrayList<Integer>> level_order_traversal(BinaryTreeNode root) {
         // Write your code here.
         ArrayList<ArrayList<Integer>> res = new ArrayList<>();
@@ -21,6 +22,9 @@
         }
         return res;
     }
+}
+```
+    
 
 
 注意几点

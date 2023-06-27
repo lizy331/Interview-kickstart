@@ -22,20 +22,22 @@ Output:
 
 这道题名字叫做 permutation 但实际上是一道组合题，也就是希望我们见所有的字母变成大写 和小写并返回
 
-static ArrayList<String> res;
-static ArrayList<String> letter_case_permutations(String s) {
+```java
+class Solution{
+    static ArrayList<String> res;
+    static ArrayList<String> letter_case_permutations(String s) {
 // Write your code here.
-res = new ArrayList<>();
-helper(s,0,new StringBuilder());
-return res;
-}
+        res = new ArrayList<>();
+        helper(s,0,new StringBuilder());
+        return res;
+    }
 
     static void helper(String s, int start, StringBuilder sb){
         if(sb.length()-s.length()==0){
             res.add(new String(sb));
             return;
         }
-        
+
         for(int i = start;i<s.length();i++){
             char c = s.charAt(i);
             if(Character.isLetter(c)){
@@ -53,10 +55,18 @@ return res;
         }
         return;
     }
+}
+```
+
 
 **注意 使用 for loop 的时候注意 recursive call 要使用 i + 1，而并不是 start + 1，因为 start 是死的， i 可以进入下一个循环**
 
 permutation 的 start 实际上是 fixed index，combination 才是真正的 start（也就是说combination中 我们需要从 start 往后筛选数字），而在 permutation 中 是按照 fixed index 来进行循环的， fixed index = 0 ， fixed index = 1， fixed index = 2 以此类推
+
+为什么我们需要在每一次添加 letter 之后都删除，因为我们需要 backtracking
+```text
+sb.deleteCharAt(sb.length()-1);
+```
 
 **时间复杂度 O(n*2^n)**
 

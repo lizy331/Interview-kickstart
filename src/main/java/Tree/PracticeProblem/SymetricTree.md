@@ -33,7 +33,8 @@
 
 对于 对称线右边的 nodes 添加顺序是 从右到左
 
-
+```java
+class Solution{
     static Boolean check_if_symmetric(BinaryTreeNode root) {
         // Write your code here.
         if(root == null || (root.left==null && root.right==null)){
@@ -50,9 +51,9 @@
             for(int i = 0;i<r;i++){
                 BinaryTreeNode leftNode = left.poll();
                 BinaryTreeNode rightNode = right.poll();
-                
+
                 if(leftNode.value-rightNode.value != 0){return false;}
-                
+
                 if(leftNode.left!=null && rightNode.right!=null){
                     left.add(leftNode.left);
                     right.add(rightNode.right);
@@ -61,7 +62,7 @@
                 }else{
                     return false;
                 }
-                
+
                 if(leftNode.right!=null && rightNode.left!=null){
                     left.add(leftNode.right);
                     right.add(rightNode.left);
@@ -74,6 +75,8 @@
         }
         return true;
     }
+}
+```
 
 
 另一种想法是 使用 DFS，配合使用 recursive，想象 lazy manager 思维，从 root 开始，将左右两边的nodes 传递给下面，让他们去判断这两个nodes 是否相等，并且返回这两个 leftnode 的左枝和 rightnode 的右枝是否相等
@@ -87,9 +90,12 @@ left node 的右枝 和 right node 的左枝是否相等
 如果 这两个 node 都不是 null 那么 判断一下 value
 是否相等，如果不相等则也返回 false；
 
+
+```java
+class Solution{
     static Boolean check_if_symmetric(BinaryTreeNode root) {
-    if (root == null) return true;
-    return isSymmetric(root.left, root.right);
+        if (root == null) return true;
+        return isSymmetric(root.left, root.right);
     }
 
     static boolean isSymmetric(BinaryTreeNode node1, BinaryTreeNode node2) {
@@ -99,11 +105,14 @@ left node 的右枝 和 right node 的左枝是否相等
         // if (node1 == null || node2 == null) {
         //     return false;
         // }
-        
+
         if (node1 == null || node2 == null || !node1.value.equals(node2.value)) {
             return false;
         }
 
         return isSymmetric(node1.left, node2.right) && isSymmetric(node1.right, node2.left);
     }
+}
+```
+    
 

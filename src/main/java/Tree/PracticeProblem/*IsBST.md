@@ -30,7 +30,8 @@ if(!flag)  或者 if(flag == false)
 上面错误的写法也可以进行编译 可以运行，但是会将 boolean 赋值
 
 
-
+```java
+class Solution{
     static Boolean flag;
     static Boolean is_bst(BinaryTreeNode root) {
         // Write your code here.
@@ -39,30 +40,33 @@ if(!flag)  或者 if(flag == false)
         // System.out.println(flag);
         return flag;
     }
-    
+
     static void helper(BinaryTreeNode root, Integer low, Integer high){
-        
+
         if(!flag){
             return;
         }
-        
+
         if(root==null){
             return;
         }
-        
+
         if(low != null && low > root.value){
             flag = false;
         }
-        
+
         if(high != null && high < root.value){
             flag = false;
         }
-        
+
         helper(root.left,low,root.value);
         helper(root.right,root.value,high);
-        
+
         return;
     }
+}
+```
+
 
 在 第 61 行 和 62 行 我们可以看到 
 

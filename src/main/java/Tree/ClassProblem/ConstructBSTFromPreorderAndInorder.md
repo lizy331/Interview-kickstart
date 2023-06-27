@@ -26,7 +26,7 @@ inorder = [9,3,15,20,7]
 
 并且我们还需要传递 创建 sub tree 的 index，也就是我们需要从 preorder 的哪些元素 和 inorder 的哪些元素 构建 subtree
 
-
+```java
     class Solution {
         Map<Integer,Integer> map;
         public TreeNode buildTree(int[] preorder, int[] inorder) {
@@ -60,7 +60,9 @@ inorder = [9,3,15,20,7]
 
         return root;
     }
-    }
+}
+```
+
 
 
 注意在 51 行 我们在 inorder array 中寻找 root 的 index 的位置的时候，我们可以使用 一个 hashmap 提起记录下来 inorder 中所有元素的 index 

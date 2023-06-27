@@ -35,13 +35,13 @@ class Solution{
 
         for(int i =0;i<n;i++){
             if(visited[i]!=1){
-                dfs(i,edges,map,visited);
+                bfs(i,edges,map,visited);
             }
         }
         return res;
     }
 
-    static void dfs(Integer source, ArrayList<ArrayList<Integer>> edges,Map<Integer,ArrayList<Integer>> map, int[] visited){
+    static void bfs(Integer source, ArrayList<ArrayList<Integer>> edges,Map<Integer,ArrayList<Integer>> map, int[] visited){
 
         Deque<Integer> dq = new ArrayDeque();
 

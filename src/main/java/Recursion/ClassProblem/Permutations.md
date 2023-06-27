@@ -22,27 +22,32 @@ Output:
 
 **而排序问题，是有多少数字排多长的数组，所以我们应该进行 swap**
 
+```java
+class Solution{
     static ArrayList<ArrayList<Integer>> res;
     static ArrayList<ArrayList<Integer>> get_permutations(ArrayList<Integer> arr) {
         // Write your code here.
         res = new ArrayList<>();
         dfs(0,arr);
-        
+
         return res;
     }
-    
+
     static void dfs(int start, ArrayList<Integer> arr){
         if(start-arr.size()+1==0){
-            res.add(new ArrayList<>(arr)); 
+            res.add(new ArrayList<>(arr));
             return;
         }
-        
+
         for(int i = start;i<arr.size();i++){
             Collections.swap(arr,start,i);
             dfs(start+1,arr);
             Collections.swap(arr,start,i);
         }
     }
+}
+```
+
 
 注意这里的 start 其实应该叫做 fixed index，也就是说我们先 fixed index 0，然后让其他位置上的数字都和 index 0 进行交换
 
@@ -54,7 +59,7 @@ Output:
 
 在这三个数组的基础上继续进行 fixed index 1， 也就是其他数字和 index 1 进行交换，那么我们又会得到
 
-[1,2,3]->[1,2,3], [1,3,2]    注意 index = 1 和 i = 1 也会进行交换，也就是自己和自己交换，则到的还是原来的数组
+[1,2,3]->[1,2,3], [1,3,2]    注意 index = 1 和 i = 1 也会进行交换，也就是自己和自己交换，得到的还是原来的数组
 
 [2,1,3]->[2,1,3], [2,3,1]
 
