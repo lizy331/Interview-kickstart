@@ -1,11 +1,10 @@
-import PracticalExperiments.Testing.ApplicationStarter;
-import PracticalExperiments.Testing.MyController;
-import PracticalExperiments.Testing.MyService;
+import JavaInterviewQuestions.Testing.ApplicationStarter;
+import JavaInterviewQuestions.Testing.MyController;
+import JavaInterviewQuestions.Testing.MyService;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringRunner;

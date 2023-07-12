@@ -144,3 +144,50 @@ sudo code:
  // loop through each node (upper diagnal is ignored)
  // arr[i][j] = arr[i-1][j] + arr[i-1][j-1]
 ```
+
+# 6. Unique Path
+
+this question is very similar to the above
+
+```text
+sudo code:
+
+// create a n x m array
+
+// init all col 0 as 1, all row 0 as 1
+for example n = 3, m =2 
+
+1 1
+1 0 
+1 0
+
+// arr[i][j] = arr[i-1][j] + arr[i][j-1]
+```
+
+# 7. Maximum Path Sum
+
+similar to previous question, given a 2D matrix we need to find the maximum path sum from top left to the bottom right
+
+where we only need to assume before last step, **the position from left and up are the maximum path sum already**, and the last step is just choose 
+
+left or up's path are bigger, then use that path to proceed to the last position
+
+![Alt Text](img/img_7.png)
+
+# 8. Minimum cost stair climb
+
+there is a note here, that we need add on two extra 0 into the cost array, this is because, there is ground and top which the cost array does not cover
+
+
+![Alt Text](img/img_8.png)
+
+# 9. Coin Change
+
+if we have a coin arr [1,3,7], and we want to make change for 10, and we are asking how many coins at least we can make change?
+
+we can think that from the last step, we just need to find the min coins change for 10-1=9, 10-3=7, 10-7=3, so we are looking for 
+
+the min coin changes of 9,7,3, the final answer will be 1 add to the minimum among them
+
+![Alt Text](img/img_9.png)
+

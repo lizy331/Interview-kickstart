@@ -18,7 +18,7 @@ public class FoodAPI {
         URL obj = new URL(url);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
-        // 设置请求方法为 POST
+        // 设置请求方法为 get
         con.setRequestMethod("GET");
 
 
