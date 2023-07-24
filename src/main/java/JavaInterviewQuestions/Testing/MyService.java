@@ -4,8 +4,11 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class MyService {
-    public String getMessage() {
-        return "Hello World!";
+    public MyCustomResponse getMessage() {
+
+        MyCustomResponse myCustomResponse = new MyCustomResponse();
+        myCustomResponse.setMessage("Hello World!");
+        return myCustomResponse;
     }
 
     public String postMessage(){

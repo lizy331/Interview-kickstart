@@ -31,4 +31,8 @@ public class NChooseK {
         }
         return arr[n][r];
     }
+
+    public static void main(String[] args) {
+        System.out.println(ncr(15,9));
+    }
 }

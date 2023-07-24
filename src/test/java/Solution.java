@@ -31,11 +31,47 @@ public class Solution {
     }
 
 
+    public static int[] moveZeroToLeft(int[] num){
+
+        int s = num.length;
+        for(int i = num.length-1;i>=0;i--){
+            if (s!=num.length && num[s]==0 && num[i]!=0){
+                swap(num,i,s);
+                while(num[s]!=0 && s>=0){
+                    s--;
+                }
+            }
+            if (num[i]==0 && s==num.length){
+                s = i;
+            }
+        }
+
+        return num;
+
+    }
+
+    public static void swap(int[] num, int l, int r){
+        int temp = num[l];
+        num[l] = num[r];
+        num[r] = temp;
+    }
+
+//    1,2,7,0,9,10,0,3
+//          s
+
+
+
     public static void main(String[] args) {
 //        int[] arr = new int[]{1,2,3,4,5,1,1,1,1,2,2,2,2,3,3,3,3,3,3,3,};
 //        System.out.println(topKFreq(arr));
-        System.out.println(100 + 100 + "Simple");
-        System.out.println("simple" + 100 + 100);
+//        System.out.println(100 + 100 + "Simple");
+//        System.out.println("simple" + 100 + 100);
+
+
+        int[] arr = new int[]{1,2,7,0,9,10,0};
+
+        System.out.println(Arrays.toString(moveZeroToLeft(arr)));
+
     }
 }
 

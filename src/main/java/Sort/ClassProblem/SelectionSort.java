@@ -23,12 +23,39 @@ public class SelectionSort {
         return arr;
     }
 
+    public static void selectionSort(int[] arr){
+
+        // loop each int i, start from 0
+        // loop each int j, start from i
+        // find the smallest among int j , and swap with the index of i
+        for(int i = 0;i<arr.length;i++){
+            int index = i;
+            for(int j = i;j<arr.length;j++){
+                // find the min
+                if(arr[j]<arr[index]){
+                    index = j;
+                }
+
+            }
+            // swap with index i
+            int temp = arr[i];
+            arr[i] = arr[index];
+            arr[index] = temp;
+        }
+
+    }
+
     public static void main(String[] args) {
-        ArrayList<Integer> list = new ArrayList<>(Arrays.asList(14,5,25,7,1,32,12));
+//        ArrayList<Integer> list = new ArrayList<>(Arrays.asList(14,5,25,7,1,32,12));
+//
+//        List<Integer> res = selection_sort(list);
+//
+//        System.out.println(res);
 
-        List<Integer> res = selection_sort(list);
 
-        System.out.println(res);
+        int[] arr = new int[]{14,5,25,7,1,32,12};
+        selectionSort(arr);
+        System.out.println(Arrays.toString(arr));
 
     }
 
@@ -37,7 +64,7 @@ public class SelectionSort {
 
 
 //keep puting the small number into the front
-// we make sure each position we looping through is the minimial in the array
+// we make sure each position we looping through is the minimal in the array
 
 //
 //[15,4,6,7,19,27]
