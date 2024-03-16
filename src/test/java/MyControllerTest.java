@@ -30,10 +30,11 @@ public class MyControllerTest {
     @MockBean
     private MyService myService;
 
+
     @Test
     public void greetingTest() throws Exception {
         when(myService.postMessage()).thenReturn("Hello Test!");
-        this.mockMvc.perform(post("/posting")).andDo(MockMvcResultHandlers.print()).andExpect(status().isOk())
+        this.mockMvc.perform(post("/api/posting")).andDo(MockMvcResultHandlers.print()).andExpect(status().isOk())
                 .andExpect(content().string(containsString("Hello Test!")));
     }
 

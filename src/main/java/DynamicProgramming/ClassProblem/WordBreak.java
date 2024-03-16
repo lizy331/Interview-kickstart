@@ -4,6 +4,21 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+// Given a string and a dictionary of words,
+// check whether the given string can be broken down into a space-separated sequence of one or more dictionary words.
+//
+//        Example One
+//        {
+//        "s": "helloworldhello",
+//        "words_dictionary": ["world", "hello", "faang"]
+//        }
+
+//        Output:
+//
+//        1
+
+// helloworldhello can be broken down as hello world hello.
+
 public class WordBreak {
 
         public boolean wordBreak(String s, List<String> wordDict) {
@@ -11,6 +26,10 @@ public class WordBreak {
             // 其中 dp[i] 表示范围 [0, i) 内的子串是否可以拆分
             boolean[] dp = new boolean[s.length()+1];
             dp[0] = true;
+            // 使用 i 遍历字符串，也就是不停的添加 字符
+            // 使用 j 从最左边开始遍历，我们判断 substring(j,i) 是否是一个 valid string
+            // 如果 substring(j,i) 是一个 valid string，并且 dp[j] 为 true （说明在 j位置上 之前的 string 也可以划分）
+            // 那么 我们就可以在 dp[i] 位置上更新为 true
             for (int i = 1;i<=s.length();i++){
                 for (int j = 0;j<i;j++){
                     // System.out.println(Arrays.toString(dp));
@@ -25,6 +44,10 @@ public class WordBreak {
             }
             return dp[s.length()];
         }
+
+    public static void main(String[] args) {
+
+    }
     }
 
 // dp:
