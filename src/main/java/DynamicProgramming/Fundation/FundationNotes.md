@@ -71,7 +71,7 @@ sudo code:
 imaging the problem as a graph, where the fib() call are the vertex, all we need to do is to do the topological sorting
 and from bottom to top, we are able to figure out the answer.
 
-we can also bring the space complexity down into a contant space, by repetively using a 3 length array
+we can also bring the space complexity down into a constant space, by respectively using a 3 length array
 
 ![Alt Text](img/img_3.png)
 
@@ -93,6 +93,30 @@ class Solution{
         return memo[n % 3];
     }
     
+}
+```
+
+Mar 15, 2024
+```java
+class Solution {
+    
+    // 思考的方式应该是先思考 array，然后 思考到 可以对 array 进行空间上的简化，也就是使用 constant space，3个 空位
+    public int fib(int n) {
+        if(n<2){
+            return n-1==0 ? 1 : 0;
+        }
+        int[] arr = new int[3];
+        arr[0] = 0;
+        arr[1]=1;
+        for(int i = 2; i <= n; i++){
+            int res = arr[0] +  arr[1];
+            arr[2] = res;
+            arr[0] = arr[1];
+            arr[1] = res;
+        }
+
+        return arr[2];
+    }
 }
 ```
 

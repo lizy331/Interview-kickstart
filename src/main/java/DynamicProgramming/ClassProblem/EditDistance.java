@@ -29,7 +29,7 @@ public class EditDistance {
                 dp[i][j] = Math.min(dp[i-1][j]+1,dp[i][j-1]+1);
 
                 // the cost of replacement
-                int rep = dp[i-1][j-1] + (word1.charAt(i-1) - word2.charAt(j-1) ==0 ? 0 : 1) ;
+                int rep = dp[i-1][j-1] + (word1.charAt(i-1) - word2.charAt(j-1) ==0 ? 0 : 1);
 
                 // take the min of replacement or add/subtract, the min
                 dp[i][j] = Math.min(dp[i][j],rep);
@@ -53,11 +53,35 @@ public class EditDistance {
 
 // dp[0][2] 进行 insertion insert 两个 char，所以 min cost 为 2，以此类推
 
-// 追后返回 dp[m][n]
+// 动态转移方程：
+/*
+    我们需要分成三类来比较，replacement 以及 add subtract
+    add/subtraction: dp[i][j] = Math.min(dp[i-1][j] + 1,dp[i][j-1] + 1);
+
+    注意为什么 dp[i-1][j] + 1 是delegation，这是因为，假如说我们希望将 wd1 = "abc" 转化为 wd2 = "ab", 那么我们需要计算的是 dp[3][2]
+            那么我们需要观察的就是 dp[3-1][2] = dp[2][2] 也就是 sequation: wd1 = "ab" 转化成为 wd2 = "ab",
+            通过代码之前的循环 dp 数组应该得到的是 dp[2][2] = 0，因为他们完全相等
+            我们怎么知道 dp[2][2] = 0, 是因为下面这行代码实现的
+            // the cost of replacement
+            int rep = dp[i-1][j-1] + (word1.charAt(i-1) - word2.charAt(j-1) ==0 ? 0 : 1);
+
+    那么问题又来了，你怎么知道 i 一定会大于 j 呢？ 也就是说 只有 wd1 = "abc" 转化为 wd2 = "ab" 这种情况，才会出现 delete
+            比如说 dp[2][3] 即 wd1 = "ab" 转化为 wd2 = "abc", 你考虑的是对的，此时的 delete 是没有意义的，dp[2-1][3] wd1="a"-> wd2="abc"
+            但是代码还是会计算，但是很显然 insert operation 的 cost 要小于 delete operation
+
+
+     the cost of replacement
+             int rep = dp[i-1][j-1] + (word1.charAt(i-1) - word2.charAt(j-1) ==0 ? 0 : 1);
+
+       假如 i 和 j 是相等的 也就是 dp[3][3], wd1 = "abc" -> wd2 = "abd"，那么我们只需要从 dp 数组中获取 dp[2][2] 也就是 ab -> ab 的cost
+       然后加上 确定最后一个 字母是否相等 "a"=="b"?，如果不相等则需要 replacement 就 +1，如果相等 就 + 0
+*/
+
+// 最后返回 dp[m][n]， 其意思就是，我们将一个 长度为 m 的字符串（horse）转换成长度为 n 的字符串（ros）所需要的 cost
 
 //       r   o   s
 //    0  1   2   3
-// h  1
+// h  1  1   2
 // o  2
 // r  3
 // s  4

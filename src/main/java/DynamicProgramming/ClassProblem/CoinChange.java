@@ -26,6 +26,8 @@ public class CoinChange {
             for(int coin : coins){
                 if(coin<=i){
                     // which means this coin can be added
+                    // dp[i] means the min number of coin to made up i
+                    // we need to compare with the dp[(i-c)]+1
                     dp[i] = Math.min(dp[i],dp[i-coin]+1);
                 }
             }
