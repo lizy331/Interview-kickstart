@@ -20,8 +20,14 @@ public class MergeSort {
 
         // 不断的将 array 分割
         int mid = left + (right - left) / 2;
+
+        // 循环会在 left = mid 的时候被返回, 循环的镜头是 单个数字
         mergeSort(arr, temp, left, mid);
+
+        // 在循环的镜头 mid + 1 = right，所以也会被返回，循环的尽头 也是单个数字
         mergeSort(arr, temp, mid + 1, right);
+
+        // 此时 right 只比 left 大一个，也就是相当于 两个单个数字进行 合并
         merge(arr, temp, left, mid, right);
     }
 
@@ -56,5 +62,13 @@ public class MergeSort {
             System.out.print(num + " ");
         }
     }
+
+    /*
+    初始数组为 [38, 27, 43, 3]。
+    第一次分割后，我们得到两个子数组 [38, 27] 和 [43, 3]。
+    继续分割这两个子数组，得到 [38]、[27]、[43] 和 [3]。
+    开始合并过程：先合并 [38] 和 [27] 得到 [27, 38]，然后合并 [43] 和 [3] 得到 [3, 43]。
+    最后，合并 [27, 38] 和 [3, 43] 得到 [3, 27, 38, 43]。
+     */
 }
 

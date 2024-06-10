@@ -43,6 +43,8 @@ public class QuickSort {
         System.out.println(Arrays.toString(arr));
 
         // continue for left half
+        // 其实主要的思想就是使用一个 pivot 将小于这个 pivot 的数字放到 mid 左边，大于 pivot 的数字放到 mid 右边
+        // 然后继续对左半部和又半部进行同样的操作
         helper(arr,start,s-1);
         helper(arr,s+1,end);
 

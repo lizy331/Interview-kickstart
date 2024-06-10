@@ -28,6 +28,9 @@ public class SelectionSort {
         // loop each int i, start from 0
         // loop each int j, start from i
         // find the smallest among int j , and swap with the index of i
+
+        //也就是写两个 for loop，一个 for loop i 遍历位置
+        // 另一个 for loop 从 i 开始往后寻找array 中最小的数字，然后和 位置 i 进行换位置
         for(int i = 0;i<arr.length;i++){
             int index = i;
             for(int j = i;j<arr.length;j++){
