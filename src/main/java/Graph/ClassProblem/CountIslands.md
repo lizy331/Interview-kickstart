@@ -32,8 +32,6 @@ BFS 的写法比较麻烦，主要在于我们需要一个 getNabor function 来
 
 ```java
 class Solution{
-
-
     static Integer count_islands(ArrayList<ArrayList<Integer>> matrix) {
         // Write your code here.
         Integer res = 0;

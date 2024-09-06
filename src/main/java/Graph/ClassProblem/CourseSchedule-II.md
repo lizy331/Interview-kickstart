@@ -79,10 +79,11 @@ class Solution {
 }
 ```
 
+## 解题思路
 
 我们只需要在上一道题的基础上将 所有的vertex 按照 **departure time** 从小到大排列起来 就是我们的答案
 
-也就是最先 departure 的vertex 一定是 一个 没有指向任何下一个 vertex 的点，可以理解为 directed graph 的尽头
+**也就是最先 departure 的vertex 一定是 一个 没有指向任何下一个 vertex 的点，可以理解为 directed graph 的尽头**
 
 实际上 topology sorting 是 按照 departure time 排列之后的 reverse
 
