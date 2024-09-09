@@ -89,6 +89,9 @@ class Solution {
 
 但是结合这道题具体的情况 我们不用 reverse ，因为 directed graph 的尽头一定是最基础的课程 因为 [1,0] 代表 0 是 1 的 前置课程
 
+也就是说我们在建立这个 adjacency list 的时候 是 1 -> 0, advance -> pre, 那么 dfs 遍历的尽头就是 我们的 前置课，所以符合我们期望得到由基础课程到 高级课程的顺序
+
+
 所以直接 返回 按照 departure time 排列的vertex 即可
 
 **时间复杂度 O(m+n)** 注意 这里是 directed graph，m 实际上是 所有 vertex 的 out degree 之和
