@@ -1,2 +1,4 @@
-package Backtracking;public class NQueensII {
+package Backtracking;
+
+public class NQueensII {
 }
