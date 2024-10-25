@@ -44,7 +44,7 @@ class Solution{
         for(int i = 0;i<n;i++){
             if(arri[i]==-1){
                 if(dfs(i,map,arri,depa)){
-                    ArrayList<Integer> dummy = new ArrayList<Integer>();
+                    ArrayList<Integer> dummy = new ArrayList<>();
                     dummy.add(-1);
                     return dummy;
                 }
