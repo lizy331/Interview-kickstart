@@ -8,7 +8,7 @@
 2. 这个 tree node 的 value 和其左右子树的 value 也相等
 
 在 34 行 和 38 行我们就在 检查上述的两个条件
-
+```java
     class Solution {
         int res;
         public int countUnivalSubtrees(TreeNode root) {
@@ -44,3 +44,5 @@
 
         }
     }
+    
+```
