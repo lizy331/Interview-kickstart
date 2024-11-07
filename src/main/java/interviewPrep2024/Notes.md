@@ -449,6 +449,79 @@ class Solution {
 }
 ```
 
+### 2334. Subarray With Elements Greater Than Varying Threshold
+
+考点: 单调栈
+
+这道题 让我们寻找一个 subarray 其中每一个元素 都满足 大于 threadhold/k, k 是 subarray 的size
+
+1. **当我们需要判断 thread/k < num[I] 的时候 我们可以反方向思考 thread < num[i]*k**
+
+
+youtube 视频
+https://www.youtube.com/watch?v=RLXKMvqNhdw
+
+
+2. 维护一个 单调栈的目的是用来 返回 previous smaller 以及 next smaller，这样 我们就可以方便的将 nums[i] 衍生到 previous smaller 以及 next smaller，也就是组成一个 rectangular，这个 rectangular最高点就是 这个 nums[i]， **因为在这个 nums[i] 组成的 subarray 当中 这个 nums[i] 是最小的（因为抛去了 previous smaller 和 next smaller）**
+
+
+这个 rectangular 的面积就是 nums[i] * (next smaller index - previous smaller index)
+
+
+将题目转化成为 找到 一个 rectangular，让这个 rec 的面积 大于 threadhold
+
+问题：如果我们遇见了一个 和 stack peek 相等的元素 该怎么办，是否pop 掉 stack peek？
+答案是，不用pop，为什么？
+
+```java
+class Solution {
+    public int validSubarraySize(int[] nums, int threshold) {
+        // nums[i] > thread/k
+
+        // nums[i] * k > thread
+        
+
+        // [1,3,7,9,6,6,1]
+
+        // stack 4     5
+        //       1
+        //       0
+
+        // pop 4
+
+        List<Integer> list = new ArrayList<>();
+        list.add(0);
+        for(int num : nums){
+            list.add(num);
+        }
+        list.add(0);
+
+        Stack<Integer> stack = new Stack(); // stack store the index of element
+
+        for(int i = 0;i<list.size();i++){
+            // 什么时候才开始计算 面积
+            // 为什么这里使用 while loop
+            while(!stack.isEmpty() && list.get(i) < list.get(stack.peek())){
+                // found right boundary
+                int h = list.get(stack.pop());
+                int width = i - stack.peek() -1;
+                int area = h * width;
+                if(area > threshold){
+                    return width;
+                }
+            }
+            stack.push(i);
+
+        }
+
+        return -1;
+        
+    }
+}
+```
+
+问题：答案当中输出的 [3,4,3] 是在什么情况下出现的？
+
 
 
 ## String
@@ -459,6 +532,80 @@ class Solution {
 
 注意在当hashmap 中没有储存过 key 的时候，我们添加这个 key 和 ArrayList 的pair，**并且要将当前的 string 加入到这个 arraylist 当中**
 
+### 394. Decode String
+
+考点：String Stack
+
+这道题给了一个数字 以及方括号 以及 字母的组合，让我们将这些 string 还原成其原来的 string
+
+```text
+Example 1:
+
+Input: s = "3[a]2[bc]"
+Output: "aaabcbc"
+Example 2:
+
+Input: s = "3[a2[c]]"
+Output: "accaccacc"
+Example 3:
+
+Input: s = "2[abc]3[cd]ef"
+Output: "abcabccdcdcdef"
+```
+
+实现步骤
+遍历字符串：对字符串中的每个字符执行相应操作。
+
+
+1. 遇到数字：使用 while 循环提取完整数字并计算倍数，将倍数存入 numStack。
+2. 遇到 [：将当前倍数 num 和当前构建的 cur（部分字符串）分别推入 numStack 和 strStack。然后重置 num 和 cur，为处理新括号内容做好准备。
+3. 遇到 ]：从 numStack 弹出倍数 times，从 strStack 弹出外层字符串 content。将 cur 重复 times 次并添加到 content，再将合成的字符串赋值给 cur。
+4. 遇到字母：直接添加到当前字符串 cur 中。
+
+注意细节：在提取数字时，while 循环将 i 移动到非数字位置。为了避免跳过字符，需要在 while 循环后执行 i--，确保 for 循环能正确处理接下来的字符。
+
+总结
+strStack 用于存储每层括号外部的字符串，cur 用于当前括号内容的构建。通过这种方式，每当遇到 ] 时，可以将 cur 与上层字符串合并，从而实现递归解码。
+
+```java
+class Solution {
+    public String decodeString(String s) {
+        
+        Stack<Integer> numStack = new Stack<>();
+        Stack<StringBuilder> strStack = new Stack<>(); // 我们应该将整个 cur String push 到 stack 当中
+
+        int num = 0;
+        StringBuilder cur = new StringBuilder();
+        for(int i = 0;i<s.length();i++){
+            char c = s.charAt(i);
+            if(Character.isDigit(c)){
+                while(i < s.length() && Character.isDigit(s.charAt(i))){
+                    num = num*10 + s.charAt(i)-'0';
+                    i++;
+                }
+                i--;
+            }else if(c == '['){
+                numStack.push(num);
+                strStack.push(cur);
+                num = 0;
+                cur = new StringBuilder(); // 这一步会影响已经存到 stack 当中的结果么，这一步开启了一个 新的 reference
+            }else if(c == ']'){
+                int times = numStack.pop();
+                StringBuilder content = strStack.pop();
+                for(int j = 0;j<times;j++){
+                    content.append(cur);
+                }
+                cur = content;
+            }
+            else{
+                cur.append(c);
+            }
+        }
+
+        return cur.toString();
+    }
+}
+```
 
 ### 5. Longest Palindromic Substring
 
@@ -589,8 +736,78 @@ class Solution {
 使用 prefixSum，生成一个 prefixSum 数值范围内的 random number，然后使用 binary search
  在 prefixSum 当中寻找插入点
 
+### 33. Search in Rotated Sorted Array
 
+考点: Binary Search
 
+这道题 告诉我们给定的 input array 是已经被sorted 并且是更具一个 点被 rotated 了，让我们在这个 array 当中寻找 target，
+
+```text
+Example 1:
+
+Input: nums = [4,5,6,7,0,1,2], target = 0
+Output: 4
+Example 2:
+
+Input: nums = [4,5,6,7,0,1,2], target = 3
+Output: -1
+Example 3:
+
+Input: nums = [1], target = 0
+Output: -1
+```
+
+我们的做法是 首先找到 这个 pivot，通过的方式是，寻找最小的数字的 index，当我们找到这个 minIndex 之后再根据 target 和 nums[minIndex] 之间的 大小关系进行 regular binary search
+注意在寻找 最小 数字的 index 时候 的边界条件的 判断 nums[mid] > nums[right] 这说明了 从 mid 到 右侧一定存在 被 rotated 的部分，因为 正常来说 right 肯定是要大于 mid的，而且 mid 肯定不是 minIndex，因为 mid > right怎么说也可能是 right
+
+```java
+class Solution {
+    public int search(int[] nums, int target) {
+        
+        // find the pivot
+        int left = 0;
+        int right = nums.length-1;
+
+        // find the min value index
+        while(left<right){
+            int mid = (right-left)/2 + left;
+            if(nums[mid] > nums[right]){
+                // min is on right
+                left = mid + 1;
+            }else{
+                right = mid;
+            }
+        }
+
+        int minIndex = left;
+        left = 0;
+        right = nums.length-1;
+
+        // based on the which side of the target reside of the pivot, use the regular binary search
+        if(target >= nums[minIndex] && target <= nums[right]){ // 注意这里必须要保证两个条件都满足，因为如果只有一个条件 target >= nums[minIndex] 满足，还不能说明 target 就一定在 右侧
+            return binarySearch(nums,minIndex, right,target);
+        }else{
+            return binarySearch(nums,left,minIndex-1,target);
+        }
+
+    }
+
+    public int binarySearch(int[] nums, int left, int right, int target){
+        while(left<right){
+            int mid = left + (right-left)/2;
+            if (nums[mid] == target){
+                return mid;
+            }else if(nums[mid] > target){
+                right = mid;
+            }else{
+                left = mid + 1;
+            }
+        }
+
+        return nums[left] == target ? left : -1;
+    }
+}
+```
 ### 162. Find Peak Element
 
 考点: Binary Search
@@ -608,6 +825,82 @@ class Solution {
 那么对比一下 mid + 1，如果 mid + 1 大于 mid，（上边的星）那么 peak一定在 mid 之后，移动左指针 left = mid + 1
 
 如果 mid + 1 小于 mid（下边的星）那么peak 一定在 mid 之前，有可能就是 mid, 所以我们应该移动右指针 right = mid，（**不是 mid - 1，因为 mid 也有可能就是答案**）
+
+### 300. Longest Increasing Subsequence
+
+考点: Binary Search
+
+这道题 让我们在一个array 当中找出最长的递增 sequence，注意 sequence 的意思是所有的 元素并不一定是 连续的，但是只要他们是递增的就可以，也就是 LIS（longest increasing subsequence）
+
+```text
+Example 1:
+
+Input: nums = [10,9,2,5,3,7,101,18]
+Output: 4
+Explanation: The longest increasing subsequence is [2,3,7,101], therefore the length is 4.
+Example 2:
+
+Input: nums = [0,1,0,3,2,3]
+Output: 4
+Example 3:
+
+Input: nums = [7,7,7,7,7,7,7]
+Output: 1
+```
+
+解决方案是使用一个 和nums 相同长度的 array，我们不断更新这个 array让其 size 是 LIS 的 size，每一次我们遇见新的元素 比如 num，我们都在这个 array 当中寻找最小的大于这个 num 的元素，并且将其更新为 num
+比如说
+```text
+我们维持了一个 array 1 2 9 10 是一个 increase subsequence, 当我们遇见 4 的时候，会将这个 array 更新成 1 2 4 10，此时 LIS 的 size 依然没有变，还是 4，但是我们优化了这个 array，
+
+array 1 2 4 10 下一次我们遇见了 5，此时我们又将 这个 array 更新成了 1 2 4 5， size 依然没有变花，但是 array 更加优化了，
+
+1 2 4 5 是一个更优解，因为 如果下次 有一个 6 元素出现的 时候，这个 subsequence 就可以将这个 6 insert 进去
+```
+
+```java
+class Solution {
+    public int lengthOfLIS(int[] nums) {
+        // [2,3,7,101,109] 109
+
+        int[] arr = new int[nums.length];
+        int size = 0;
+
+        for(int i = 0;i<nums.length;i++){
+            int index = binarySearch(arr,0,size,nums[i]);
+
+            if(index >= size){
+                arr[size] = nums[i];
+                size++;
+            }
+
+            arr[index] = nums[i]; //这一步的作用是什么，如果 我们的 arr 是 [2,3,7,15] 此时遇见了一个数字 4, 那么我们 会将 array 更成 [2,4,7,15] 这么做的好处是什么？
+        }
+
+        return size;
+
+        
+    }
+
+    public int binarySearch(int[] arr, int left, int right, int target){
+        while(left<= right){
+            int mid = left + (right-left)/2;
+            if(arr[mid] == target){
+                return mid;
+            }else if(arr[mid] > target){
+                right = mid -1;
+            }else{
+                left = mid + 1;
+            }
+        }
+
+        return left;
+    }
+}
+```
+
+注意我们在写 这个 binary search 的时候使用的条件是 left <= right,使用 left <= right 作为循环条件的原因是为了确保当 left == right 时依然会进行最后一次判断。如果 nums[left] 依然不是目标 target，则 left 最终会指向数组中第一个大于 target 的位置，从而满足查找最小的大于 target 的元素的需求。
+这种方式适用于我们知道 target 可能不存在于 array 当中的情况，**此时 输出的 left 就是 离 target 最近并且 大于 target 的元素的 index**
 
 
 ### 1004. Max Consecutive Ones III
@@ -845,6 +1138,76 @@ class Solution {
 }
 ```
 
+### 694. Number of Distinct Islands
+
+考点: DFS BFS
+
+这道题 让我们count 有多少种不同的 岛屿布局
+
+```text
+Input: grid = 
+[[1,1,0,0,0],
+ [1,1,0,0,0],
+ [0,0,0,1,1],
+ [0,0,0,1,1]]
+ 
+Output: 1
+```
+我们使用 dfs 来遍历每一个 点，并且记录一个 遍历的 路径操作，这个遍历的路径就保证了这个 岛屿的布局的唯一性
+
+```java
+class Solution {
+    private HashSet<String> set;
+    public int numDistinctIslands(int[][] grid) {
+        // 使用路径来作为 岛屿的 key
+        // 每一个岛屿我们都是从左上角的元素开始遍历的
+        int m = grid.length;
+        int n = grid[0].length;
+        set = new HashSet();
+        for(int i = 0;i<m;i++){
+            for(int j = 0;j<n;j++){
+                if(grid[i][j] == 1){
+                    StringBuilder sb = new StringBuilder();
+                    dfs(grid,i,j,"o",sb);
+                    set.add(new String(sb));
+                }
+            }
+        }
+
+        // System.out.println(set);
+        return set.size();
+    }
+
+    public void dfs(int[][] grid, int i, int j,String opt, StringBuilder sb){
+        if(i<0 || j<0 || i>=grid.length || j>=grid[0].length || grid[i][j] == 0){
+            return;
+        }
+        
+        grid[i][j] = 0;
+        sb.append(opt);
+
+        dfs(grid,i+1,j,"d",sb);
+        dfs(grid,i-1,j,"u",sb);
+        dfs(grid,i,j+1,"r",sb);
+        dfs(grid,i,j-1,"l",sb);
+        sb.append("b"); // back
+
+        return;
+    }
+}
+```
+
+注意我们为什么要添加  “ sb.append("b");” 比如下面的例子
+
+```text
+1 1 0
+0 1 1
+0 0 0
+1 1 1
+0 1 0
+```
+
+如果不添加一个 b 那么两个 岛屿的 路径操作都会是 r->d->r, 这是因为下面的 岛屿在 r->d 之后就会超出了边界，此时就会回到上一个点开始其他方向上的 dfs，所以在这种情况下我们还需要添加一个 b，来作为记录当前点已经无路可走，需要返回上一个点的情况
 
 
 ### 426. Convert Binary Search Tree to Sorted Doubly Linked List
@@ -881,4 +1244,68 @@ DFS 的做法，需要注意的是我们需要使用 hashmap 来防止重复的 
 ```text
 if(map.contains(node)){return;}
 
+```
+
+### 210. Course Schedule II
+
+考点 DFS
+
+```java
+class Solution {
+
+    public List<Integer> result;
+    public Map<Integer,List<Integer>> adj;
+    public int[] findOrder(int numCourses, int[][] prerequisites) {
+        // build the adj map, [a,b] b->a
+        adj = new HashMap<>();
+        for(int i = 0;i<numCourses;i++){
+            adj.put(i,new ArrayList<>());
+        }
+
+        for(int[] pre : prerequisites){
+            adj.get(pre[1]).add(pre[0]);
+        }
+
+        // dfs, start from each course, dfs should return a boolean indicates if there is a cycle
+        // if circle detceted, return empty int[]
+        int[] visited = new int[numCourses]; // 0 is not visited, 1 is visiting, -1 departured
+        result = new ArrayList<>();
+
+        for(int i =0;i<numCourses;i++){
+            if(visited[i]==0){
+                if(dfs(i, visited)){
+                    return new int[0];
+                }
+            }
+        }
+
+        // list of course, reverse the list result
+        Collections.reverse(result);
+
+        return result.stream().mapToInt(i->i).toArray(); // 注意这里是 toArray 并不是 asArray
+
+
+    }
+
+    public boolean dfs(int start, int[] visited){
+        
+        if(visited[start] == 1){
+            return true;
+        }
+        if(visited[start] == -1){
+            return false; // 这里为什么要 return false, 因为这个 点可能是多个点的 target，其中一个 点先遍历到了这个点 并将这个 点标记成了 -1，之后其他的点又遍历到了这里，此时我们直接返回 false 防止重复
+        }
+
+        visited[start] = 1;
+        for(int neighbor : adj.get(start)){
+            if(dfs(neighbor,visited)){
+                return true;
+            }
+        }
+        visited[start] = -1;
+        result.add(start);
+
+        return false;
+    }
+}
 ```
