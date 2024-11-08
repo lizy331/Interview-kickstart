@@ -773,6 +773,76 @@ class Solution {
 ```
 
 
+### 24. Swap Nodes in Pairs
+
+考点: LinkedList
+
+这道题 让我们将一个 linkedlist 的每相邻的两个 node 调换位置，
+
+```text
+Example 1:
+
+Input: head = [1,2,3,4]
+
+Output: [2,1,4,3]
+
+Example 2:
+
+Input: head = []
+
+Output: []
+
+Example 3:
+
+Input: head = [1]
+
+Output: [1]
+
+Example 4:
+
+Input: head = [1,2,3]
+
+Output: [2,1,3]
+```
+
+就平常的做法，使用 三个 pointer, prev -> cur -> nex
+
+```java
+/**
+ * Definition for singly-linked list.
+ * public class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode() {}
+ *     ListNode(int val) { this.val = val; }
+ *     ListNode(int val, ListNode next) { this.val = val; this.next = next; }
+ * }
+ */
+class Solution {
+    public ListNode swapPairs(ListNode head) {
+        ListNode dummy = new ListNode(-1);
+        dummy.next = head;
+        ListNode pre = dummy;
+        while(head!=null && head.next!=null){
+            // changing:  pre -> cur -> nex -> ...
+            // to become: pre -> nex -> cur -> ...
+            ListNode cur = head;
+            ListNode nex = head.next;
+            pre.next = nex;
+
+            
+            cur.next = nex.next;
+            nex.next = cur;
+            pre = cur;
+            head = cur.next;
+        }
+        return dummy.next;
+    }
+}
+```
+
+注意这里的 trick，我们移动的是 head，并且在 while loop 当中每次新建根据 head 来新建 cur 和 nex
+
 
 
 
