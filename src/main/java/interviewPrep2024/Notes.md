@@ -581,6 +581,153 @@ class Solution {
 }
 ```
 
+### 6. Zigzag Conversion
+
+考点: String Math
+
+这道题给了一个 字符串让我们以 zigzag 的方式来遍历这个 字符串 然后按照每一行来输出 结果
+
+```text
+Example 1:
+
+Input: s = "PAYPALISHIRING", numRows = 3
+Output: "PAHNAPLSIIGYIR"
+Example 2:
+
+Input: s = "PAYPALISHIRING", numRows = 4
+Output: "PINALSIGYAHRPI"
+Explanation:
+P     I    N
+A   L S  I G
+Y A   H R
+P     I
+Example 3:
+
+Input: s = "A", numRows = 1
+Output: "A"
+```
+
+比较简单的想法是使用 hashmap, numRow -> StringBuilder, 然后按照 zigzag 的顺序向每一行添加 character，最后将所有行合并
+```java
+class Solution {
+    public String convert(String s, int numRows) {
+        if (numRows == 1) return s;
+        
+        // hashmap , numRow -> StringBuilder
+        Map<Integer,StringBuilder> map = new HashMap<>();
+        for(int i = 1;i<=numRows;i++){
+            map.put(i,new StringBuilder());
+        }
+
+        int index = 0;
+        int curRow = 1;
+        boolean down = true;
+        while(index < s.length()){
+            char c = s.charAt(index);
+            map.get(curRow).append(c);
+            if(down == true && curRow==numRows){
+                curRow--;
+                down = false;
+            }else if(down == false && curRow == 1){
+                curRow++;
+                down = true;
+            }else if(down == true && curRow < numRows){
+                curRow++;
+            }else if(down == false && curRow > 1){
+                curRow--;
+            }
+            index++;
+        }
+
+        StringBuilder result = new StringBuilder();
+        for(int i = 1; i<=numRows;i++){
+            result.append(map.get(i));
+        }
+
+        return result.toString();
+    }
+}
+```
+
+但是这道题 最优解是通过 数学的 方式计算出来 第一行的 zigzag 字母有哪些，第二行到倒数第二行有哪些，最后一行有哪些，观察发现 zigzag 的一个周期 是下面这样的
+
+```text
+P     ...
+A   L 
+Y A   
+P    
+```
+也就是说 下一个第一行的 元素的 index 将会是 curIndex + numRows + (numRows - 2), 解释一下是因为numRows 从上往下，numRows - 2 是 中间的肚子的数量，从地下往上遍历的 元素的数量
+那么也就是说 一个周期的 元素的个数是 M =  numRows + (numRows - 2), 那么会有多少个这样的周期？ 一共会有 s.length()/M, 但是注意 如果 s 的 length 恰好是 M 的倍数的时候，我们会得到争取结果，但是 如果 s length 不是 M 的倍数的时候，最后一个周期将会被 skip 掉，**因为计算机计算int 的时候默认是向下取整的**
+但是在这道题当中我们不能向下取整，因为即使最后一个周期的数量不完整，我们也需要将其计数下来，就比如说 example 当中 s length = 14, M = 6, 14/6 = 2 但是实际上 这个 zigzag 是经历了三个周期的
+
+```text
+P     I    N
+A   L S  I G
+Y A   H R
+P     I
+
+第一个周期 PAYPAL
+第二个周期 ISHIRI
+第三个周期 NG
+```
+
+**所以我们应该将 a/b 进行向上取整的运算，既 (a-1)/b + 1** 所以我们计算的 N = (s.length()-1)/M + 1, 计算出了 M 和 N 之后我们需要对每一行按照周期将 character 加入到 result 当中
+
+第一行 index += M
+第二行(中间肚子有两个元素), 第二行是第１和M-1个元素，第三行是第２和Ｍ-2个元素也就是 M*i + curRow, M * i + M - curRow，注意这里的 i 是第几个周期 i = 0; i<N ;i ++
+最后一行 M*i + curRow-1
+
+```java
+class Solution {
+    public String convert(String s, int numRows) {
+        // 如果只有一行，直接返回原字符串
+        if (numRows == 1) return s;
+
+        int len = s.length();
+        int M = numRows * 2 - 2; // 一个周期的元素数目
+        int N = (len - 1) / M + 1; // 计算周期数
+
+        StringBuilder result = new StringBuilder();
+
+        // 处理第一行
+        for (int i = 0; i < N; i++) {
+            int index = M * i;
+            if (index < len) {
+                result.append(s.charAt(index));
+            }
+        }
+
+        // 处理中间行（第1行到第numRows-2行）
+        for (int row = 1; row < numRows - 1; row++) {
+            for (int i = 0; i < N; i++) {
+                int index1 = M * i + row;
+                int index2 = M * i + M - row;
+
+                if (index1 < len) {
+                    result.append(s.charAt(index1));
+                }
+                if (index2 < len) {
+                    result.append(s.charAt(index2));
+                }
+            }
+        }
+
+        // 处理最后一行
+        for (int i = 0; i < N; i++) {
+            int index = M * i + numRows - 1;
+            if (index < len) {
+                result.append(s.charAt(index));
+            }
+        }
+
+        return result.toString();
+    }
+}
+
+```
+
+## Binary Search
 
 ### 528. Random Pick with Weight
 
