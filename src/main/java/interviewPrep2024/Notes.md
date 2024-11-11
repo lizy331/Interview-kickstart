@@ -127,7 +127,259 @@ class Solution {
 ```
 
 
+### 16. 3Sum Closest
 
+考点: two pointer
+
+这道题是 3sum 的变种，现在告诉我们，array 中可能不存在 target，让我们寻找 3sum 得到的最接近 target 的结果，还是和 3sum 一样的做法，在 two sum 当中我们需要在每次移动两个指针的时候判断一下 当前的sum 和 target 的距离，并使用一个 global result 来记录距离 target 最近的 result
+
+我第一次的做的时候出现的错误，
+1. 既然是距离，那么你就需要使用 Math.abs() 来做，
+2. 在初始化 result 的时候，应该将 result 初始化为 nums[i], nums[j], nums[k]
+3. for loop 的时候，i 应该在 i<nums.length-2 时停止
+
+```java
+class Solution {
+    public int threeSumClosest(int[] nums, int target) {
+        //sort the array
+        Arrays.sort(nums);
+
+        // for every i, find the j and k that closest to target, if equal to tagrte then return
+        int result = nums[0] + nums[1] + nums[2];
+        for(int i = 0;i<nums.length-2;i++){
+            int temp = twoSum(nums,i,target);
+            if(temp == target){
+                return temp;
+            }else{
+                result = Math.abs(result-target) >= Math.abs(temp-target) ? temp : result;
+            }
+        }
+
+        return result;
+
+    }
+
+    public int twoSum(int[] nums, int i, int target){
+        int j = i+1;
+        int k = nums.length-1;
+        int sum = 0;
+        int result = nums[i] + nums[j] + nums[k];
+        while(j<k){
+            sum = nums[i] + nums[j] + nums[k];
+            if(sum == target){
+                return sum;
+            }else if(sum < target){
+                result = Math.abs(result - target) >= Math.abs(sum - target) ? sum : result;
+                j++;
+            }else{
+                result = Math.abs(result - target) > Math.abs(sum - target) ? sum : result;
+                k--;
+            }
+        }
+
+        return result;
+    }
+}
+```
+
+时间复杂度 O(nlogn)
+空间复杂度 O(1)
+
+
+### 18. 4Sum
+
+考点: two pointer
+
+```text
+Example 1:
+
+Input: nums = [1,0,-1,0,-2,2], target = 0
+Output: [[-2,-1,1,2],[-2,0,0,2],[-1,0,0,1]]
+Example 2:
+
+Input: nums = [2,2,2,2,2], target = 8
+Output: [[2,2,2,2]]
+```
+4Sum 同样是按照 3 sum 的方法来做，先选一个 a，然后开始循环 b，选一个 b，开始循环 c 和 d，特别需要注意中间的去重
+
+这道题给我的启发是，我们不需要特别的写一个单独的function，来做 twoSum，我们可以直接将所有的嵌套写在一个function 当中，我们在写 3sum 的时候也应该这么做，因为快
+
+```java
+class Solution {
+    public List<List<Integer>> fourSum(int[] nums, int target) {
+        Arrays.sort(nums);
+        List<List<Integer>> result = new ArrayList<>();
+        
+        for (int a = 0; a < nums.length - 3; a++) {
+            if (a > 0 && nums[a] == nums[a - 1]) continue;  // 去重
+            
+            for (int b = a + 1; b < nums.length - 2; b++) {
+                if (b > a + 1 && nums[b] == nums[b - 1]) continue;  // 去重
+                
+                int c = b + 1;
+                int d = nums.length - 1;
+                
+                while (c < d) {
+                    int sum = nums[a] + nums[b] + nums[c] + nums[d];
+                    
+                    if (sum == target) {
+                        result.add(Arrays.asList(nums[a], nums[b], nums[c], nums[d]));
+                        
+                        while (c < d && nums[c] == nums[c + 1]) c++;  // 去重
+                        while (c < d && nums[d] == nums[d - 1]) d--;  // 去重
+                        
+                        c++;
+                        d--;
+                    } else if (sum < target) {
+                        c++;
+                    } else {
+                        d--;
+                    }
+                }
+            }
+        }
+        
+        return result;
+    }
+}
+
+```
+
+时间复杂度 O(N^3)
+空间 O(n); 用于保存结果
+
+### 259. 3Sum Smaller
+
+考点: two pointer
+
+和之前的 3sum 非常类似，不同点在于 现在 我们需要统计的是 3sum 小于 target 的数量，并且我们是允许 duplicate 的
+
+```java
+class Solution {
+    public int threeSumSmaller(int[] nums, int target) {
+        if(nums.length<3){return 0;}
+
+        Arrays.sort(nums);
+        int result = 0;
+        for(int i = 0;i<nums.length-1;i++){
+            int j = i+1;
+            int k = nums.length-1;
+            while(j<k){
+                int sum = nums[i] + nums[j] + nums[k];
+                if(sum < target){
+                    result += k-j; // 注意计数的方式 i j       k, 如果 目前的 i j k 满足小于 target的条件，那么 i j k-1 也满足，i j k-2 也满足 。。。，所以共有 k-j 个答案，
+                    j++;
+                }else{
+                    k--;
+                }
+            }
+        }
+
+        return result;
+    }
+}
+```
+
+时间 O(nlogn)
+空间 O(1)
+
+注意 k-j+1 是 index j 到 k 所有元素的个数
+k-j 则是去除了一个元素，在这道题中，我们计数结果的时候，不能把 j 算进去，因为 k 不能移动到 j 的位置上
+
+### 30. Substring with Concatenation of All Words
+
+考点: Two pointer
+
+这道题给了一个 words array 其中包含 string，然后给了我们一个 string s, 让我们寻找哪些 startIndex 是一个恰好（exactly）包含所有的 在 words 当中的 string
+
+
+```text
+Example 1:
+
+Input: s = "barfoothefoobarman", words = ["foo","bar"]
+
+Output: [0,9]
+
+Explanation:
+
+The substring starting at 0 is "barfoo". It is the concatenation of ["bar","foo"] which is a permutation of words.
+The substring starting at 9 is "foobar". It is the concatenation of ["foo","bar"] which is a permutation of words.
+
+Example 2:
+
+Input: s = "wordgoodgoodgoodbestword", words = ["word","good","best","word"]
+
+Output: []
+
+Explanation:
+
+There is no concatenated substring.
+
+Example 3:
+
+Input: s = "barfoofoobarthefoobarman", words = ["bar","foo","the"]
+
+Output: [6,9,12]
+
+Explanation:
+
+The substring starting at 6 is "foobarthe". It is the concatenation of ["foo","bar","the"].
+The substring starting at 9 is "barthefoo". It is the concatenation of ["bar","the","foo"].
+The substring starting at 12 is "thefoobar". It is the concatenation of ["the","foo","bar"].
+```
+
+sliding window
+
+```java
+import java.util.*;
+
+class Solution {
+    public List<Integer> findSubstring(String s, String[] words) {
+        List<Integer> result = new ArrayList<>();
+        if (s == null || s.length() == 0 || words == null || words.length == 0) return result;
+
+        int wordLength = words[0].length();
+        int wordCount = words.length;
+        int windowSize = wordLength * wordCount;
+
+        Map<String, Integer> wordFreq = new HashMap<>();
+        for (String word : words) {
+            wordFreq.put(word, wordFreq.getOrDefault(word, 0) + 1);
+        }
+
+        for (int start = 0; start < wordLength; start++) {
+            Map<String, Integer> windowMap = new HashMap<>();
+            int left = start, count = 0;
+
+            for (int right = start; right <= s.length() - wordLength; right += wordLength) { // 需要学习这种 移动指针的方式，尤其是我们需要按照一个递增或递减的的 fixed 数量来遍历
+                String sub = s.substring(right, right + wordLength);
+
+                if (wordFreq.containsKey(sub)) {
+                    windowMap.put(sub, windowMap.getOrDefault(sub, 0) + 1);
+                    count++;
+
+                    while (windowMap.get(sub) > wordFreq.get(sub)) {
+                        String leftWord = s.substring(left, left + wordLength);
+                        windowMap.put(leftWord, windowMap.get(leftWord) - 1);
+                        left += wordLength;
+                        count--;
+                    }
+
+                    if (count == wordCount) {
+                        result.add(left);
+                    }
+                } else {
+                    windowMap.clear();
+                    count = 0;
+                    left = right + wordLength;
+                }
+            }
+        }
+        return result;
+    }
+}
+
+```
 ### leetcode 238: Product of Array Except Self
 
 考点 数组
@@ -177,6 +429,69 @@ L L L L L L mid R R R R R R
  返回的还是 num1 的 index（如果 num1 + num1 = target）
 
 所以这道题 使用 双指针从两头开始找，但是在找的过程中，可以使用 一个 二分法的思想 让 双指针走得更快一些
+
+
+### 665. Non-decreasing Array
+
+考点: sort, Array
+
+这道题 要求我们在 只能替换一个数字的情况下，判断这个 array 是否是 non decreasing 的
+
+```text
+Example 1:
+
+Input: nums = [4,2,3]
+Output: true
+Explanation: You could modify the first 4 to 1 to get a non-decreasing array.
+Example 2:
+
+Input: nums = [4,2,1]
+Output: false
+Explanation: You cannot get a non-decreasing array by modifying at most one element.
+```
+
+这道题的核心在于 当我们遇见第一次 nums[i-1] >= nums[i] 的时候如何使用我们的 替换权利 来将 nums[i-1] 或者是 nums[i] 替换
+比如说 5 6 4 9 12 当我们遍历到 4 的时候，我们需要考虑 是将 4 变成 6 还是 将 6 变成 4，显然我们需要将 4 变成 6，否则数组将不再递增
+
+所以我们在 判断的时候 还需要考虑 nums[i-2] 这个 数字
+
+```text
+if nums[i-2] > nums[i]          //说明 nums[i] 太小了
+    nums[i] = nums[i-1]
+else if nums[i-2] <= nums[i]    // 注意这里为什么是 <=,  如果 nums[i-2] 和 nums[i] 相等了，那么我们应该替换的是 nums[i-1]，因为此时 nums[i-1] 是 大于 nums[i] 的
+    nums[i-1] = nums[i] 
+```
+
+还有 我们使用了 i-2 这样的 index，所以需要小心数组越界的情况
+
+```java
+class Solution {
+    public boolean checkPossibility(int[] nums) {
+        
+
+        // 3 6 4 3
+        int count = 0;
+        for(int i = 1;i<nums.length;i++){
+            if(nums[i] < nums[i-1]){
+                count++;
+                if(count > 1){
+                    return false;
+                }
+
+                if(i<2 || nums[i-2] <= nums[i]){ // 为什么这里是 <= ?
+                    nums[i-1] = nums[i];
+                    
+                }else{
+                    // nums[i] is too small
+                    nums[i] = nums[i-1];
+                }
+            }
+        }
+
+        return true;
+    }
+}
+```
 
 
 ## _区间类问题_
@@ -628,6 +943,72 @@ abba 是从两个 character 'bb' 开始向两遍衍生的，这是需要通过 �
 
 如果 这个 repeat char 出现在 left 之前那么 当前的 sliding window 就是 valid，如果 出现在 当前的 left 之后，那么我们需要更新当前的 left pointer 然后计算 当前 sliding window
  的 length
+
+### 424. Longest Repeating Character Replacement
+
+考点: sliding window
+
+这道题，让我们通过 最多k 次转换来找到一个 最长的 repeating subarray，和上面的 leetcode 3 有点相似
+
+```text
+Example 1:
+
+Input: s = "ABAB", k = 2
+Output: 4
+Explanation: Replace the two 'A's with two 'B's or vice versa.
+Example 2:
+
+Input: s = "AABABBA", k = 1
+Output: 4
+Explanation: Replace the one 'A' in the middle with 'B' and form "AABBBBA".
+The substring "BBBB" has the longest repeating letters, which is 4.
+There may exists other ways to achieve this answer too.
+```
+
+这道题 比较自然的会想到使用 sliding window比 需要想的点在于在每一个 sliding window 当中让哪些 character 使用 这个 replacement的机会？ 我们会希望保留那些freq 最多的 character
+那么当我们使用 双指针的 sliding window来 寻找合适的 subarray 的时候，我们就需要维持一个 window 之内所有的 character 的 freq，我们可以使用 一个 int[26] 来计数每个字母出现的次数
+在每一次遍历到新的 字母的时候我们将这个字母的 freq 加一，然后计算一下当前 window 当中最大的 freq 是多少，**然后计算需要替换的 字母的数量就是 right-left+1 - findMax(windowFreq)**
+如果需要替换的 字母数量大于 k，则需要移动左指针，来缩减我们的 window 直到满足需要替换的字母数量小于 k 为止
+
+```java
+class Solution {
+    public int characterReplacement(String s, int k) {
+        
+        int[] charFreq = new int[26];
+        int left = 0;
+        int right = 0;
+        int n = s.length();
+        int result = 0;
+        while(right<n){
+            char c = s.charAt(right);
+            charFreq[c-'A']++;
+            while(left < right && (right - left + 1) - findMax(charFreq) > k){
+                // we need more replacement than k to make all char same
+                // need to move the left pointer to shrink the window
+                charFreq[s.charAt(left)-'A']--;
+                left++;
+            }
+            result = Math.max(right - left+1,result);
+            right++;
+        }
+
+        return result;
+    }
+
+    public int findMax(int[] array){
+        int result = 0;
+        for(int num : array){
+            if(num>result){
+                result = num;
+            }
+        }
+        return result;
+    }
+}
+```
+
+Time O(n), findMax method is O(26), right pointer traverse O(n), left pointer shrinking O(n)
+Space O(26)
 
 
 ### 20. Valid Parentheses
@@ -1379,3 +1760,96 @@ class Solution {
     }
 }
 ```
+
+### 787. Cheapest Flights Within K Stops
+
+考点: Dijkstra's algorithm， 带有权重的 edge 问题, graph
+
+![img_1.png](img_1.png)
+```text
+Example 1:
+
+Input: n = 4, flights = [[0,1,100],[1,2,100],[2,0,100],[1,3,600],[2,3,200]], src = 0, dst = 3, k = 1
+Output: 700
+Explanation:
+The graph is shown above.
+The optimal path with at most 1 stop from city 0 to 3 is marked in red and has cost 100 + 600 = 700.
+Note that the path through cities [0,1,2,3] is cheaper but is invalid because it uses 2 stops.
+```
+
+这道题 让我们寻找从 一个城市 src 坐飞机到另一个 城市 dst 的 最小的 cost，flights 数组代表的是 [start,end,price]，并且 还要满足一个条件就是，中转的次数 不能超过 k
+
+通常这类带有权重的 edge 的 graph 问题并且要求我们求最小值的情况下，都是需要通过 Dijkstra 来实现
+
+Dijkstra 的算法用来求解单源最短路径问题，一个点到另一个点。该算法利用优先队列（通常是最小堆）来确保每一步选择的路径是当前代价最小的（贪心思想），从而逐步扩展最短路径，最终找到从起点到所有其他节点的最短路径。
+
+```java
+import java.util.*;
+
+class Solution {
+ public int findCheapestPrice(int n, int[][] flights, int src, int dst, int k) {
+  // 构建带权重的邻接表
+  Map<Integer, List<int[]>> adj = new HashMap<>();
+  for (int i = 0; i < n; i++) {
+   adj.put(i, new ArrayList<>());
+  }
+
+  for (int[] flight : flights) {
+   int from = flight[0];
+   int to = flight[1];
+   int price = flight[2];
+   adj.get(from).add(new int[]{to, price});
+  }
+
+  // 优先队列：按累积费用排序
+  Queue<int[]> queue = new PriorityQueue<>((a, b) -> Integer.compare(a[1], b[1]));
+  queue.offer(new int[]{src, 0, 0});  // 起点节点，累积费用，已使用步数
+
+  // 记录到达每个节点在每个步数下的最低费用
+  int[][] minPrice = new int[n][k + 2];
+  for (int[] row : minPrice) {
+   Arrays.fill(row, Integer.MAX_VALUE);
+  }
+  minPrice[src][0] = 0; // 从起点开始，中转 0 次的 cost，就是其本身，因为就没有出城市
+
+  while (!queue.isEmpty()) {
+   int[] cur = queue.poll();
+   int node = cur[0];
+   int cost = cur[1];
+   int stops = cur[2];
+
+   // 如果到达目的地
+   if (node == dst) {
+    return cost;
+   }
+
+   // 如果步数超出限制，则不再探索
+   if (stops > k) {
+    continue;
+   }
+
+   // 遍历邻接节点
+   for (int[] next : adj.get(node)) {
+    int nextNode = next[0];
+    int nextPrice = next[1];
+    int newCost = cost + nextPrice;
+
+    // 若在当前步数的限制下发现更低费用，更新并加入队列
+    if (newCost < minPrice[nextNode][stops + 1]) {
+     minPrice[nextNode][stops + 1] = newCost;
+     queue.offer(new int[]{nextNode, newCost, stops + 1});
+    }
+   }
+  }
+
+  // 返回最小费用或 -1（表示无解）
+  return -1;
+ }
+}
+
+
+```
+
+这个 minPrice 的作用是什么?
+minPrice[dst][k] 表示从起点 src 到节点 dst 在 k 次中转内的最低费用。
+
