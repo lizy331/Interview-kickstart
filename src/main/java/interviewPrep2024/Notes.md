@@ -41,7 +41,7 @@ while(t<=b){
 
 ### 15. 3Sum
 
-考点：two pointer，
+考点：two pointer, 
 
 这道题给了一个数组，要求我们找到 三个 元素 nums[i] + nums[j] + nums[k] = 0
 ```text
@@ -178,6 +178,176 @@ L L L L L L mid R R R R R R
 
 所以这道题 使用 双指针从两头开始找，但是在找的过程中，可以使用 一个 二分法的思想 让 双指针走得更快一些
 
+
+### 80. Remove Duplicates from Sorted Array II
+
+考点: two pointers
+
+这道题 让我们将 一个 array 当中的所有的 duplicate 都去除，但是有一个附加条件就是 每一个 duplicated1 可以最多重复出现 两次 （实际上没有让我们去除，而是让我们返回 前 k 个 array 的元素）
+
+注意这道题，我们使用双指针，是用一个 wirte pointer 用来不停的 写入数字，用一个 read pointer 来读取数字，我们让这个 wirte pointer 的位置始终处于一个 两个 duplicate 之外的第三个位置
+比如说
+```text
+1 1 1 2 2 2
+    w r
+```
+
+我们让 write pointer 和 read pointer 交换的条件就是 当 nums[write-2] != nums[read]
+
+```text
+initial:
+1 2 2 3 3 3 
+    w 
+    r
+
+nums[w-2] != nums[r], swap, and w++
+
+
+1 2 2 3 3 3
+      w
+      r
+```
+
+```java
+class Solution {
+    public int removeDuplicates(int[] nums) {
+        if(nums.length<=2){
+            return nums.length;
+        }
+
+        int write = 2;
+        for(int read = 2;read<nums.length;read++){
+            if(nums[write-2] != nums[read]){
+                nums[write] = nums[read];
+                write++;
+            }
+        }
+
+        return write;
+
+    }
+}
+```
+
+### 283. Move Zeroes
+
+考点: Two pointers
+
+这道题 让我们将所有的 0 移动到 数组的右侧（并且 需要 维持之前的数字的顺序），那么反过来来思考就是将所有的非 0 数字移动到左侧
+
+```java
+class Solution {
+    public void moveZeroes(int[] nums) {
+        int write = 0;
+        
+        for(int read = 0; read<nums.length;read++){
+            if(nums[read] != 0){
+                int temp = nums[write];
+                nums[write] = nums[read];
+                nums[read] = temp;
+                write++;
+            }
+        }
+
+        return;
+    }
+}
+```
+
+
+### 142. Linked List Cycle II
+
+考点: two pointer， LinkedList
+
+链表的双指针，我们都知道可以使用 快慢针来确定 这个 linkedList 当中是否存在 cycle，但是这道题 让我们返回的是环的 入口
+
+![img_142.png](img_142.png)
+
+```text
+Example 1:
+
+Input: head = [3,2,0,-4], pos = 1
+Output: tail connects to node index 1
+Explanation: There is a cycle in the linked list, where tail connects to the second node.
+
+Example 2:
+Input: head = [1,2], pos = 0
+Output: tail connects to node index 0
+Explanation: There is a cycle in the linked list, where tail connects to the first node.
+
+Example 3:
+Input: head = [1], pos = -1
+Output: no cycle
+Explanation: There is no cycle in the linked list.
+```
+
+```text
+假设两个指针相遇时，快指针走过了m步进入环的入口然后转了k1圈（每圈n步）又多p步；同理，慢指针走过了m步进入环的入口然后转了k2圈又多p步。由于两者是两倍关系，所以 m+k1*n+p = 2*(m+k2*n+p)。
+
+化简之后得到 m = (k1-2k2)*n-p，变换一下 p+m = (k1-2k2)*n
+
+因为慢指针目前已经比整数圈多走了p步，结合这个数学式子，这说明如果慢指针再走m步的话，又会凑成整数圈，即到了环的入口。怎么确定m呢？只要另开一个指针从head开始与慢指针一齐走，它们相遇的地方就是环的入口。
+```
+问题： 
+为什么 快指针进入圈多走了 p 步，慢指针进入圈也多走了 p 步？ **因为快指针和慢指针最后相遇了**
+
+为什么 使用一个新的 pointer 从 head 开始，就一定会和 慢指针在 入口相遇？
+
+```text
+为什么新指针和慢指针会在入口相遇
+
+从上面的公式我们可以得知：
+
+当快慢指针相遇时，慢指针已经在环内比整数圈多走了 p 步。
+因此，如果慢指针再走 m 步，就会到达环的入口。
+为了找到这个环的入口点，我们可以：
+
+保持慢指针在原地不动。
+从链表头（head）开始一个新的指针，让它和慢指针同时移动，每次都走一步。
+
+由于新的指针 head 和慢指针分别离环的入口有相同的步数 m 所以它们一定会在环的入口处相遇。
+```
+
+```java
+/**
+ * Definition for singly-linked list.
+ * class ListNode {
+ *     int val;
+ *     ListNode next;
+ *     ListNode(int x) {
+ *         val = x;
+ *         next = null;
+ *     }
+ * }
+ */
+public class Solution {
+    public ListNode detectCycle(ListNode head) {
+        ListNode fast = head;
+        ListNode slow = head;
+        boolean flag = false;
+        while(fast!=null && fast.next != null){
+            fast = fast.next.next;
+            slow= slow.next;
+            if(fast == slow){
+                flag = true;
+                break;
+            }
+        }
+
+        if(flag == false){
+            return null;
+        }
+
+        fast = head;
+        while(slow!=fast){
+            fast = fast.next;
+            slow = slow.next;
+        }
+
+        return slow;
+    }
+}
+```
 
 ## _区间类问题_
 56, 
