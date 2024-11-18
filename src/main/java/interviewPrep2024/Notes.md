@@ -490,7 +490,10 @@ class Solution {
         }
 
         return true;
-=======
+    }
+}
+```
+        
 ### 80. Remove Duplicates from Sorted Array II
 
 考点: two pointers
@@ -562,14 +565,11 @@ class Solution {
         }
 
         return;
->>>>>>> c0ffe8aa0c5c1ef788e9294da583eb0b8e4db10a
     }
 }
 ```
 
 
-<<<<<<< HEAD
-=======
 ### 142. Linked List Cycle II
 
 考点: two pointer， LinkedList
@@ -664,7 +664,73 @@ public class Solution {
 }
 ```
 
->>>>>>> c0ffe8aa0c5c1ef788e9294da583eb0b8e4db10a
+### 713. Subarray Product Less Than K
+
+考点: two pointer
+
+```text
+Example 1:
+
+Input: nums = [10,5,2,6], k = 100
+Output: 8
+Explanation: The 8 subarrays that have product less than 100 are:
+[10], [5], [2], [6], [10, 5], [5, 2], [2, 6], [5, 2, 6]
+Note that [10, 5, 2] is not included as the product of 100 is not strictly less than k.
+Example 2:
+
+Input: nums = [1,2,3], k = 0
+Output: 0
+```
+
+这道题 让我们寻找有多少个 subarray 满足其中所有元素的 product 小于 k，使用滑动窗口, 如果 subarray 的 product 小于 k 则 expand，如果 subarray 的 product 大于或者等于了 k 则 移动左指针
+在计数的时候我们需要向 result 添加 result += i-j+1, 为什么? 因为比如 [5,2,6] 那么满足条件的就是 [5,2,6], [2,6], [6],  为什么不包括 [5,2] 以及 [2]? 因为[5,2] 会在之前一轮的 i-j+1 被统计
+**这里的 i-j+1 包含的只是以新添加的最后一个元素 6 为基础 组成的 subarray**, 
+
+```java
+class Solution {
+    public int numSubarrayProductLessThanK(int[] nums, int k) {
+        if(k<=1)return 0;
+
+        int j = 0;
+
+        int windowProduct = 1;
+        int result = 0;
+        for(int i = 0;i<nums.length;i++){
+            windowProduct *= nums[i];
+            while(windowProduct>=k){
+                windowProduct /= nums[j];
+                j++;
+            }
+            result += i-j+1;
+        }
+        return result;
+    }
+}
+```
+
+### 923. 3Sum With Multiplicity
+
+考点: two pointer
+
+```text
+Example 1:
+
+Input: arr = [1,1,2,2,3,3,4,4,5,5], target = 8
+Output: 20
+Explanation: 
+Enumerating by the values (arr[i], arr[j], arr[k]):
+(1, 2, 5) occurs 8 times;
+(1, 3, 4) occurs 8 times;
+(2, 2, 4) occurs 2 times;
+(2, 3, 3) occurs 2 times.
+```
+
+这道题依然是 3sum，不同的是现在我们的 i j k 位置上的三个元素是可以相同的, 比如说 [1,1,2] 也是一个合法的 三元组合了
+
+那么这道题我们依然还是按照 3sum 的做法来做，不同点在于，我们需要处理 duplicated 的情况
+
+
+
 ## _区间类问题_
 56, 
 
