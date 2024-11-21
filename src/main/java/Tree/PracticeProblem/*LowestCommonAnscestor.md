@@ -76,6 +76,11 @@ class Solution{
 注意这道题的 写法，第 50 行，是 bottom up 中第一个遇见的 if statement，也就是用来判断 一个 node 是否是 我们需要找的 node 的代码
 
 当我们在 50 行找到一个 node 之后立即返回
+```text
+if( head.value == p.value || head.value == q.value) {
+            return head;
+        }
+```
 
 
 这个代码巧妙地解决了一个 不太好直接看出来的 问题，也就是 我们需要寻找的 两个 node 就是 父子关系，

@@ -410,6 +410,39 @@ L L L L L L mid R R R R R R
 如何找到 i 和 j?  可以从mid 向两边遍历寻找最大sum
 ```
 
+### 169. Majority Element
+
+考点: counting, Array
+
+这道题 给了一个数组 让我们计数其中最多次出现的 element
+
+我们可以使用一个 count 和一个 result，然后遍历数组，当这个 count 变成 0 的 时候我们就将result 赋值为 当前数字，如果当前数字就是 result 那么就将 count++
+如果不是就 count--，这样出现的最多次的 element 一定会是 result
+
+```java
+class Solution {
+    public int majorityElement(int[] nums) {
+        int count = 0;
+        int res = 0;
+        for(int i = 0;i<nums.length;i++){
+            if(count==0){res = nums[i]; count++;}
+            else{
+                if(nums[i] == res){
+                    count++;
+                }else{
+                    count--;
+                }
+
+            }
+        }
+        return res;
+    }
+}
+
+// res = 2
+// [2,2,1,1,1,2,2]
+//      ^
+```
 
 ### 153. Find Minimum in Rotated Sorted Array
 
@@ -1076,7 +1109,7 @@ class Solution {
 
 
 
-## String
+## String 字符串
 
 ### 49. Group Anagrams
 
@@ -1167,7 +1200,17 @@ class Solution {
 
 aba 是 从一个 character 'b' 开始向两边衍生的，
 
-abba 是从两个 character 'bb' 开始向两遍衍生的，这是需要通过 观察以及经验 总结出来的
+abba 是从两个 character 'bb' 开始向两遍衍生的，
+这些细节是需要通过 观察以及经验 总结出来的
+
+### 680. Valid Palindrome II
+
+考点: string
+
+这道题要求我们在最多只替换一个 character 的前提下是否能将给定的 string 变成一个回文，那么我们可以使用双指针，左指针从 0 开始，右指针从 数组末尾开始，一旦遇见两个指针的 character 不想等，那么我们就开始比对 i,j-1 以及 i+1,j 这两个区间内的 回文是否 valid
+也就是说 只要出现了一次两个指针不相等，那么我们就开始判断 去除左指针或者右指针的 部分是否 是 valid 回文
+
+
 
 
 ### 3. Longest Substring Without Repeating Characters
@@ -1973,6 +2016,12 @@ class Solution {
 }
 ```
 
+### 1644. Lowest Common Ancestor of a Binary Tree II
+
+考点: DFS
+
+
+
 ### 694. Number of Distinct Islands
 
 考点: DFS BFS
@@ -2051,6 +2100,9 @@ class Solution {
 
 在做 tree 一类的 问题的时候，**我们可以使用一个 全局变量 叫做 lastNode 来记录 当前 node 的 parent node 是什么**，这是一个非常重要的 技巧
 
+二刷:
+我们需要两个 全局变量 firstNode 和 lastNode，因为我们最终需要的是一个环
+中序遍历的时候，如果我们遇见 lastNode 是 null 那么说明这个node 是我们的 firstNode，否则我们就将 当前 node.left 指向 lastNode，把 lastNode 的 right 指向当前 node
 
 ### 129. Sum Root to Leaf Numbers
 
@@ -2072,7 +2124,55 @@ class Solution {
 
 这道题的核心就在于 使用一个 hashmap ，key 作为 original node，value 作为 copy node，
 
-BFS 的做法，我们需要提前在 hashmap 当中构建 node -> copy node 的映射，然后在每一层遍历的时候首先检查这个 neighbor 是否存在 hashmap 当中，如果不存在，则添加
+BFS 的做法，我们需要提前在 hashmap 当中构建 node -> copy node 的映射，然后在每一层遍历的时候首先检查这个 neighbor 是否存在 hashmap 当中，如果不存在，则添加, 
+
+**我们需要在什么情况下再将 node offer到 queue 当中去？**
+我们相当于是把这个 map 当坐了一个 visited
+
+```java
+/*
+// Definition for a Node.
+class Node {
+    public int val;
+    public List<Node> neighbors;
+    public Node() {
+        val = 0;
+        neighbors = new ArrayList<Node>();
+    }
+    public Node(int _val) {
+        val = _val;
+        neighbors = new ArrayList<Node>();
+    }
+    public Node(int _val, ArrayList<Node> _neighbors) {
+        val = _val;
+        neighbors = _neighbors;
+    }
+}
+*/
+
+class Solution {
+    public Node cloneGraph(Node node) {
+        if(node == null)return node;
+        Map<Node,Node> map = new HashMap<>();
+        map.put(node,new Node(node.val));
+        Queue<Node> queue = new LinkedList<>();
+        queue.offer(node);
+        while(!queue.isEmpty()){
+            Node curNode = queue.poll();
+            for(Node neighbor : curNode.neighbors){
+                if(!map.containsKey(neighbor)){
+                    map.put(neighbor,new Node(neighbor.val));
+                    queue.offer(neighbor); // 思考一下为什么当 neighbor 不再 map当中的时候 就加入到 queue
+                }
+                map.get(curNode).neighbors.add(map.get(neighbor));
+            }
+        }
+
+        return map.get(node);
+
+    }
+}
+```
 
 DFS 的做法，需要注意的是我们需要使用 hashmap 来防止重复的 访问 某一个 node，也就是说 DFS 的停止条件是 
 
