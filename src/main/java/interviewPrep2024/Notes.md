@@ -2337,3 +2337,77 @@ class Solution {
 这个 minPrice 的作用是什么?
 minPrice[dst][k] 表示从起点 src 到节点 dst 在 k 次中转内的最低费用。
 
+
+## Dynamic Programing
+
+### 139. Word Break
+
+考点: dp, two pointer
+
+```text
+Example 1:
+
+Input: s = "leetcode", wordDict = ["leet","code"]
+Output: true
+Explanation: Return true because "leetcode" can be segmented as "leet code".
+Example 2:
+
+Input: s = "applepenapple", wordDict = ["apple","pen"]
+Output: true
+Explanation: Return true because "applepenapple" can be segmented as "apple pen apple".
+Note that you are allowed to reuse a dictionary word.
+Example 3:
+
+Input: s = "catsandog", wordDict = ["cats","dog","sand","and","cat"]
+Output: false
+```
+
+给了我们一个 String s 和一个 List of String wordDict, 让我们判断一下这个 String 是否可以通过 wordDict 当中的 word 来组成，让我们返回 一个 boolean 值
+
+我们使用动态规划来做 dp[i] 的意思是 从 index 0 到 index i-1 的位置上 是否可以使用 wordDict 当中的 word 来拼接成这个 String s，也就是说 在 i 之前（不包括 i）的 substring 是可以通过 wordDict 当中的 word 来拼接而成的
+
+**问题一: 为什么 需要取从 index 0 到 index i-1？**
+
+因为这样写我们的 动态转移方程比较好写
+
+```text
+dp[i] = dp[j] && wordSet.contains(s.substring(j, i));
+
+我们需要每次将 j 从 0 开始移动直到 i，上面的 动态转移方程的意思是 从 某一个 j开始 （这个 j 之前的substring 是可以被 concat 的）
+从 j 到 i-1 的 substring 也是可以通过 wordDict 来 construct 的，那么此时 dp[i] 就可以标记为 true
+```
+
+否则 如果 dp[i] 代表的是 从 0 到 i 的 string 可以被 construct，那么 动态转移方程将会非常复杂
+```text
+dp[i] = dp[j] && wordSet.contains(s.substring(j + 1, i + 1));
+
+因为 dp[j] 是包括 index j 的，所以在使用 substring function 的时候就需要 j+1，并且最后的 index 也得是 i+1
+```
+
+下面是 code:
+
+```java
+class Solution {
+    public boolean wordBreak(String s, List<String> wordDict) {
+        Set<String> wordSet = new HashSet<>(wordDict);
+        boolean[] dp = new boolean[s.length()+1]; // 为什么 dp 需要初始化 为 length+1 长度
+
+        dp[0] = true;
+        for(int i = 1;i<=s.length();i++){
+            for(int j = 0;j<i;j++){ //为什么 j 指针 < i，为什么不是 j<=i ?
+                if(dp[j] && wordSet.contains(s.substring(j,i))){ // 为什么 substring 是 从 j 到 i 的，substring 是不包括 i index 的 char的
+                    dp[i] = true;
+                    break;
+                }
+            }
+        }
+        return dp[s.length()]; // 最后为什么返回的是 dp[s.length()]
+    }
+}
+```
+
+
+**问题二: 为什么 j 指针 < i，为什么不是 j<=i ?**
+
+因为如果 j == i，那么在 substring 当中就会是 s.substring(i,i) 此时substring 会返回空字符串，没有意义，（也就是说其实加上也可以）
+
