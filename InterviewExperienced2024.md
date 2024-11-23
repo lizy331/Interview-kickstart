@@ -22,7 +22,7 @@ Follow up 如果 input 没有给 n 个 course 怎么做这道题？
 在我们创建 graph 的时候我们需要做出一些改变，之前我们可以通过 numVertex 直接将所有的vertex 的 adjacency list 初始化，但是当题目中没有 给 numVertex 的时候
 我们就需要通过 所有的 edges 来将 adjacency list 给初始化出来
 
-[CourseII.java](https://github.com/username/leetcode/blob/main/src/main/java/InterviewByCompany/TikTok/CourseII.java)
+[CourseII.java](https://github.com/lizy331/Interview-kickstart/blob/main/src/main/java/InterviewByCompany/TikTok/CourseII.java)
 
 
 
