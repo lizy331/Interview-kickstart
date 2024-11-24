@@ -2411,3 +2411,500 @@ class Solution {
 
 因为如果 j == i，那么在 substring 当中就会是 s.substring(i,i) 此时substring 会返回空字符串，没有意义，（也就是说其实加上也可以）
 
+
+
+## Top 150
+
+### Array/String
+
+#### 88. Merge Sorted Array
+
+这道题 给了两个 数组，让我们将其 sort，要求直接将 merged 之后的 array 写在 nums1 上
+
+follow up: 如果 给的是一个 listnode 怎么办，需要我们新建一个 ListNode 来 put Value
+
+```java
+class Solution {
+    public void merge(int[] nums1, int m, int[] nums2, int n) {
+        // starting from the back of the nums1, compare m-1 index of nums1 and n-1 index of nums2
+        // put the larger one on the writer index
+
+        int writer = nums1.length-1;
+        int pointer1 = m-1;
+        int pointer2 = n-1;
+        
+        while(pointer1 >=0 && pointer2 >= 0){
+            if(nums1[pointer1] >= nums2[pointer2] ){
+                nums1[writer] = nums1[pointer1];
+                pointer1--;
+            }else{
+                nums1[writer] = nums2[pointer2];
+                pointer2--;
+            }
+            writer--;
+        }
+
+        while(pointer1 >= 0 ){
+            nums1[writer--] = nums1[pointer1];
+            pointer1--;
+        }
+
+        while(pointer2 >= 0 ){
+            nums1[writer--] = nums2[pointer2];
+            pointer2--;
+        }
+
+        return;
+    }
+}
+```
+
+
+#### 27. Remove Element
+
+这道题 让我们 移除 array 当中的某一个 val，也就是将所有的这个 val 放到 数组的最后边，同时保持 数组的原来顺序不变
+
+```java
+class Solution {
+    public int removeElement(int[] nums, int val) {
+        // storedIndex start fomr 0;
+        // if the element is not equal to val, swap with storeIndex, sI++
+        int storedIndex = 0;
+        int count = 0; // count how many element not equals to val
+        for(int i = 0;i<nums.length;i++){
+            if(nums[i] != val){
+                int temp = nums[i];
+                nums[i] = nums[storedIndex];
+                nums[storedIndex] = temp;
+                storedIndex++; 
+                count++;
+            }
+        }
+
+        return count;
+    }
+}
+```
+
+#### * 26. Remove Duplicates from Sorted Array
+
+这道题让我们从 duplicated array 当中移除重复数字，我们使用一个 storedIndex 从 0 开始，每当我们遇见 cur num 不等于 storedIndex 上的数字的时候
+我们首先 storedIndex++ 然后将 storedIndex 赋值为 num
+
+```java
+class Solution {
+    public int removeDuplicates(int[] nums) {
+        if(nums.length == 1) return 1;
+        
+        int storedIndex = 0;
+        for(int i = 0;i<nums.length;i++){
+            if(nums[i] != nums[storedIndex]){
+             storedIndex++;
+                nums[storedIndex] = nums[i]; 
+            }
+        }
+
+        return storedIndex+1;
+    }
+}
+```
+
+#### 80. * Remove Duplicates from Sorted Array II
+
+这道让我们 在一个 sorted array 当中移除 duplicated elements，和之前不同的是这次我们允许最多两次重复
+
+解决方案，**我们需要判断 nums[storedIndex-2] 和当前的 cur num 是否相等** 如果不相等那就 swap ，storedIndex 是我们即将放置其他数字的位置, 我们需要保证 storedIndex 和 storedIndex-2 的位置上的数字是必须是不相等的，也就是说 storedIndex 这个位置是一定要变的
+接下来我们需要思考的是 storedIndex 这个位置上的数字变成什么，这个位置上的数字应该变成为 “只要和 storedIndex-2 不相等” 的数字
+
+```java
+class Solution {
+    public int removeDuplicates(int[] nums) {
+        if(nums.length<=2) return nums.length;
+
+        int storedIndex = 2;
+        for(int i = 2;i<nums.length;i++){
+            if(nums[storedIndex-2] != nums[i]){
+                int temp = nums[storedIndex];
+                nums[storedIndex] = nums[i];
+                nums[i] = temp;
+                storedIndex++;
+            }
+        }
+        return storedIndex;
+    }
+}
+```
+**follow up: 如果我们允许最多 3 次 重复呢，k 次？**
+依然可以使用上面的做法，只不过需要将 nums[storeIndex-3] 和 cur num 相比
+
+
+#### 169. Majority Element
+
+这道题让我们寻找 array 当中的 **众数**，我们可以使用一个 count 和一个 result，每当我们遇见和 result 相等的数字 count ++，否则 count--，当 count 减小到 0 的时候更新 count = 1, result = nums[i]
+
+```java
+class Solution {
+    public int majorityElement(int[] nums) {
+        int result = nums[0];
+        int count = 1;
+        for(int i = 1;i<nums.length;i++){
+            if(nums[i] == result ){
+                count++;
+            }else{
+                count--;
+                if(count<=0){
+                    result = nums[i];
+                    count = 1;
+                }
+            }
+        }
+        return result;
+    }
+}
+```
+
+#### 189. Rotate Array
+
+这道题让我们对 array 进行旋转 k 次，注意 如果 k 大于了 array length 那么就需要对 array length 取余,
+我们通过对 array 进行 reverse 来实现
+
+```java
+class Solution {
+    public void rotate(int[] nums, int k) {
+        k %= nums.length;
+
+        // reverse the array;
+        reverse(nums,0,nums.length-1);
+
+        // reverse the 0 -> k-1
+        reverse(nums,0,k-1);
+
+        // reverse k -> nums.length-1;
+        reverse(nums,k,nums.length-1);
+        return;
+
+
+    }
+
+    public void reverse(int[] nums, int start, int end){
+        while(start<end){
+            int temp = nums[start];
+            nums[start] = nums[end];
+            nums[end] = temp;
+            start++;
+            end--;
+        }
+    }
+}
+```
+
+#### 121. Best Time to Buy and Sell Stock
+
+这道题 给了一个数组让我们判断从一个 index i 到 另一个 index j 的最大差值是多少, 注意 j 在 i 之后
+
+也就是说让我们找两个位置的元素之差最大的值
+
+那么就只要遇见小的则更新最小值，只要遇见大的，就更新 result
+
+```java
+class Solution {
+    public int maxProfit(int[] nums ) {
+        // buyIndex, nums[i] < nums[buyIndex], update buyIndex
+        // for each step update the result with nums[i] - nums[buyIndex];
+        int buyIndex = 0;
+        int result = 0;
+        for(int i = 0;i<nums.length;i++){
+            if(nums[i] < nums[buyIndex]){
+                buyIndex = i;
+            }else {
+                result = Math.max(nums[i]-nums[buyIndex],result);
+            }
+        }
+
+        return result;
+    }
+}
+```
+
+#### 122. Best Time to Buy and Sell Stock II
+
+这道题实际上就是让我们在找 所有的 递增 subarray 当中最大值和最小值的差，我们可以通过 不断在这个 递增 subarray 中 对 i 和 i-1 index 的数字最差并且将这些差 sum 起来就是我们最终的结果
+
+
+```java
+class Solution {
+    public int maxProfit(int[] nums ) {
+        // sum all the ASC subarray (max-min)
+        int minIndex = 0;
+        int result = 0;
+        for(int i = 0;i<nums.length;i++){
+            if(nums[i] < nums[minIndex]){
+                minIndex = i;
+            }else{
+                result += nums[i]-nums[minIndex];
+                minIndex = i;
+            }
+        }
+        return result;
+    }
+}
+```
+
+
+#### 55. Jump Game
+
+这道题 给了我们一个数组 让我们判断 我们是否可以从 index 0 跳跃到 数组的最后一个位置，数组的元素代表着当前 index 可以向后跳多远
+
+```text
+Example 1:
+
+Input: nums = [2,3,1,1,4]
+Output: true
+Explanation: Jump 1 step from index 0 to 1, then 3 steps to the last index.
+Example 2:
+
+Input: nums = [3,2,1,0,4]
+Output: false
+Explanation: You will always arrive at index 3 no matter what. Its maximum jump length is 0, which makes it impossible to reach the last index.
+
+```
+
+维护一个 canReachIndex = nums.length-1 初始化为 数组的最后一个位置我们从后往前遍历 nums，只要找到一个 index 满足 i + nums[i] >= canReachIndex
+那么我们就开始寻找 哪些 index 可以 reach 这个 canReachIndex，也就是 将 canReachIndex = i
+
+```java
+class Solution {
+    public boolean canJump(int[] nums) {
+        
+        int canReachIndex = nums.length-1;
+
+        for(int i = nums.length-1;i>=0;i--){
+            if(i + nums[i] >= canReachIndex){
+                canReachIndex = i;
+            }
+        }
+
+
+        return canReachIndex == 0;
+    }
+}
+```
+
+#### * 45. Jump Game II
+
+这道题 上一道题 jump game 的变种，和之前不同的是，此时我们需要寻找的是 最小的 step 来 jump 到 数组的最后一个位置，
+
+比较 navie 的想法是，使用 nested loop，维持一个 dp，使用一个 变量 j 来更新 dp
+
+```java
+class Solution {
+    public int jump(int[] nums) {
+        int[] dp = new int[nums.length];
+        Arrays.fill(dp,Integer.MAX_VALUE);
+        dp[0] = 0;
+
+        // dp[i] = min(dp[j] + 1); where j from 0 to i
+        // nums[j] + j >= i
+        for(int i = 1;i<nums.length;i++){
+            for(int j = 0;j<i;j++){
+                if(nums[j]+j<i){continue;}
+                dp[i] = Math.min(dp[i],dp[j]+1);
+            }
+        }
+        return dp[nums.length-1];
+    }
+}
+```
+
+这道题的最优解是使用 贪心的思想
+
+我们维护三个变量
+jump 作为 当前跳跃的次数
+currentReach 作为当前这一轮跳跃的目的地 index
+maxReach 作为下一轮跳跃的最大的可以到达的范围
+
+从当前 index i 到 index i + nums[i] 的位置算作一轮 jump （可以把 jump 看出一个 level 比较好理解）
+我们把 i + nums[i] 作为我们这一轮的 currentReach，也就是说这一轮的 jump 可以达到的 就是 currentReach 
+在遍历数组 i 到 i+nums[i] （包括 i+nums[i]） 过程中我们更新 maxReach 作为我们下一轮 jump 可以达到的最大的 reach
+
+```java
+class Solution {
+    public int jump(int[] nums) {
+        int maxReach = 0;
+        int jump = 0;
+        int currentReach = 0;
+        for(int i = 0; i<nums.length-1;i++){
+            if(nums[i] + i > maxReach){
+                maxReach = nums[i] + i;
+            }
+            if(i == currentReach){
+                jump++;
+                currentReach = maxReach;
+            }
+            if(currentReach >= nums.length-1){
+                break;
+            }
+        }
+        return jump;
+    }
+}
+```
+
+
+#### 380. Insert Delete GetRandom O(1)
+
+这道题 让我们实现一下一个 set，这个 set 可以进行 get random number，要求所有的 operation 时间复杂度在 O1 
+
+既然我们需要使用 random 那么 使用list 应该是必须的，但是 如果我们使用了 list在 remove 的时候 时间复杂度 就会是 On，因为找到这个 number 的时间复杂度 就需要我们遍历一遍 这个 list
+但是 java List 当中有一个 关键的 method
+**叫做 List.removeLast()**，这个 method 的时间复杂度 就是 O1
+
+我们可以使用一个 hashmap 用来记录每一个 数字在 对应 list 当中的 index ，然后在我们 remove 这个 数字的时候 我们需要 首先 将 这个数字 和 list 当中最后一个 数字进行交换，更新 hashmap，然后 使用 List.removeLast() 来一处最后一个 element
+
+```java
+class RandomizedSet {
+    public Map<Integer,Integer> map;
+    public List<Integer> numList;
+    public Random random;
+    public RandomizedSet() {
+        map = new HashMap<>();
+        numList = new ArrayList<>();
+        random = new Random();
+    }
+    
+    public boolean insert(int val) {
+        // if exist, return false
+        if(map.containsKey(val)){
+            return false;
+        }else{
+            numList.add(val);
+            map.put(val,numList.size()-1);
+        }
+        return true;
+    }
+    
+    public boolean remove(int val) {
+        // check if exist, if not return false
+        if(!map.containsKey(val)){
+            return false;
+        }else{
+            
+            int removeIndex = map.get(val);
+            map.put(numList.get(numList.size()-1),removeIndex);
+            Collections.swap(numList,removeIndex,numList.size()-1);
+            map.remove(val);
+            numList.removeLast();
+        }
+        return true;
+    }
+    
+    public int getRandom() {
+        int randomIndex = random.nextInt(0,numList.size());
+        return numList.get(randomIndex);
+    }
+}
+```
+
+#### 238. Product of Array Except Self
+
+
+这道题给了一个数组 让我们计算每一个 index 上 除了其自己，其他所有的 数字的 product
+
+我们使用两个 array，一个 计算 当前 index 左边 所有的数字 product ，一个 用来记录右边
+
+然后左右相乘就可以得到 结果
+
+
+我们还可以优化一下，也就是只使用 两个 loop 来实现答案， 也就是先计算 leftProduct，然后计算 rightProduct 的同时 计算 result array
+
+```java
+class Solution {
+    public int[] productExceptSelf(int[] nums) {
+        int[] leftProduct = new int[nums.length];
+        leftProduct[0] = 1;
+        int[] rightProduct = new int[nums.length];
+        rightProduct[rightProduct.length-1] = 1;
+
+
+        for(int i = 1;i<nums.length;i++){
+            leftProduct[i] = leftProduct[i-1] * nums[i-1];
+        }
+
+        int[] result = new int[nums.length];
+        for(int i = nums.length-1;i>=0;i--){
+            if(i<=nums.length-2){
+                rightProduct[i] = rightProduct[i+1] * nums[i+1];
+            }
+            result[i] = rightProduct[i] * leftProduct[i];
+        }
+
+
+        return result;
+
+    }
+}
+```
+
+#### 134. Gas Station
+
+非常 tricky 的题目，这道题给了两个 array 
+gas[i] 代表 在 index i 的position 可以获得的 gas 数量 和 
+cost[i] 代表着 在 index i 的 position 需要 cost 的数量来移动到 i+1
+
+问我们 从某一个 start index 开始可以环状的遍历所有的 gas station 的 index 是什么？
+
+```text
+Example 1:
+
+Input: gas = [1,2,3,4,5], cost = [3,4,5,1,2]
+Output: 3
+Explanation:
+Start at station 3 (index 3) and fill up with 4 unit of gas. Your tank = 0 + 4 = 4
+Travel to station 4. Your tank = 4 - 1 + 5 = 8
+Travel to station 0. Your tank = 8 - 2 + 1 = 7
+Travel to station 1. Your tank = 7 - 3 + 2 = 6
+Travel to station 2. Your tank = 6 - 4 + 3 = 5
+Travel to station 3. The cost is 5. Your gas is just enough to travel back to station 3.
+Therefore, return 3 as the starting index.
+```
+**这道题的核心要点就是我们需要知道 如果 total gas 小于 total cost 的话 我们是没有办法遍历整个环中的 gas station 的** 这种情况下 我们返回 -1
+
+那么 我们从 index 0 开始维持一个 tank 用来记录 当前的 gas，如果 tank 小于 0 那么说明两种情况
+1. 整个loop 就不可能实现 遍历整个 gas station ，也就是 total gas 是小于 total cost 的
+2. 我们选择 的 startIndex 是有问题的，所以一旦 tank < 0 我们需要选择 i+1 作为 startIndex
+
+```java
+class Solution {
+    public int canCompleteCircuit(int[] gas, int[] cost) {
+        // if the sum of the total gas is larger than the sum of the total cost
+        // then there must be a solution,otherwise, return -1
+        int totalGas = 0;
+        int totalCost = 0;
+        int tank = 0;
+        int startIndex = 0;
+        for(int i = 0;i<gas.length;i++){
+            totalGas += gas[i];
+            totalCost += cost[i];
+            tank = gas[i] - cost[i];
+            if(tank < 0){
+                startIndex = i+1;
+                tank = 0;
+            }
+        
+        return totalGas >= totalCost ? startIndex : -1;
+    }
+}
+```
+
+那么有一个问题就是 我们 将 startIndex 赋值为 i+1，那么 我们不会担心 数组越界的问题么，当 i = gas.length-1 的时候 startIndex 将会等于 n？
+
+实际上如果 当 i == gas.length-1 的时候 startIndex 依然更新了，那么就说此时 tank 是小于的 0 的，也就是说 我们遍历了一遍 gas 数组我们发现，但了最后一个位置我们发现 tank 依然是小于 0 的
+那么此时 total gas 一定是 total cost 的，所以最后的返回结果一定会是 -1
+
+T: O(n)
+S: O(1)
+
+
+
+
+
