@@ -2906,5 +2906,194 @@ S: O(1)
 
 
 
+#### * 135. Candy
+
+这道题 给了我们一个 rating array，意思是 按照 rating 来分配 candy，如果 ratings[i] 大于 左右两边，那么我们需要保证分配糖果的时候满足 index i 分配到的 糖果要大于左右两边
+每一个 小朋友最少分配到一个 candy
+
+我们维持一个 candies 数组用来代表我们分配的糖果的情况，既然每一个小孩最少分配一个糖果，那么我们首先 fill 这个 array 为 1
+然后我们遍历 ratings array 来满足 每个小朋友的左边都满题目条件 只要 ratings[i] > ratings[i-1]，那么我们就将 candies[i] = candies[i+1]
+
+之后我们从右往左遍历一遍 ratings 数组，目的是 满足所有小朋友的右侧都满足条件，但是注意 当条件 ratings[i] > ratings[i+1] 出现的时候会有两种情况
+1. candies[i] 需要比 candies[i+1] 多一个 candy，那么 candies[i] 应该等于 candies[i+1] + 1
+2. candies[i] 已经满足了 candies[i] 大于 candies[i+1] 的情况，为什么会有这种情况发生？
+   比如说 ratings 数组在 i+1 之前 都是一直递增的 恰好到 i+1 的时候 ratings 开始递减了，那么此时 candies[i+1] 的位置上的 candy 是可能 等于 1 的
+ 那么我们就不能 简单的将 candies[i] = candies[i+1] + 1, because this will reduce the candies in position candies[i]
+
+for example:
+
+```text
+
+ratings: 
+[1,2,3,4,5,2]
+
+candies:
+[1,1,1,1,1,1]
+
+arrange left neighbor:
+[1,2,3,4,5,1]
+
+arrange right neighbor:
+[1,2,3,4,5,1]
+
+我们不能把 candies[4] (5) 改为 candies[4+1] (1) + 1， 这样会让 candies[4] 位置上的 candies 减小, 我们应该取 candies[i] 和 candies[i+1] 的最大值
+
+
+
+```
+
+```java
+class Solution {
+    public int candy(int[] ratings) {
+        int[] candies = new int[ratings.length];
+        Arrays.fill(candies,1);
+
+        for(int i = 1;i<ratings.length;i++){
+            if(ratings[i] > ratings[i-1]){
+                candies[i] = candies[i-1] + 1;
+            }
+        }
+
+        for(int i = ratings.length-2;i>=0;i--){
+            if(ratings[i] > ratings[i+1]){
+                candies[i] = Math.max(candies[i], candies[i+1] + 1);
+            }
+        }
+
+        int result = 0;
+        for(int i = 0;i<candies.length;i++){
+            result+= candies[i];
+        }
+
+        return result;
+
+    }
+}
+```
+
+#### 42. Trapping Rain Water
+
+经典老题，都知道解决方案是使用两个 array 但是在一些细节上面需要注意
+
+leftMax array 用来记录 index i （**包括 index i**）向左边的 最高的 height
+rightMax array 用来记录 index i（**包括 index i**） 向右边的 最高的 height
+
+```text
+input :    [0,1,0,2,1,0,1,3,2,1,2,1]
+
+leftMax:   [0,1,1,2,2,2,2,3,3,3,3,3]
+rightMax:  [3,3,3,3,3,3,3,3,2,2,2,0]
+
+sum 的结果  [0,0,1,0,1,2,1,0,0,1,0,0]
+
+result = 1 + 1 + 2 + 1 + 1 = 6
+```
+
+```java
+class Solution {
+    public int trap(int[] height) {
+        int[] rightMax = new int[height.length]; // the max height on the index right, including the index right
+        int[] leftMax = new int[height.length]; // the max height on the index left, including index i
+
+        int leftMaxHeight = height[0];
+        for(int i = 1;i<height.length;i++){
+            if(height[i] > leftMaxHeight){
+                leftMax[i] = height[i];
+                leftMaxHeight = height[i];
+            }else{
+                leftMax[i] = leftMaxHeight;
+            }
+        }
+
+        int rightMaxHeight = height[height.length-1];
+        int result = 0;
+        for(int i = height.length-2;i>=0;i--){
+            if(height[i] > rightMaxHeight){
+                rightMax[i] = height[i];
+                rightMaxHeight = height[i];
+            }else{
+                rightMax[i] = rightMaxHeight;
+            }
+
+            int sum = Math.min(leftMax[i],rightMax[i]) - height[i];
+            result += (sum > 0) ? sum : 0;
+        }
+
+        return result;
+    }
+    
+    public static void main(String[] args){
+        int[] testcase1 = new int[]{0,1,0,2,1,0,1,3,2,1,2,1};
+        Solution solution    = new Solution();
+        System.out.println(solution.trap(testcase1));
+    }
+}
+
+```
+
+
+#### 13. Roman to Integer
+
+这道题让我们将 罗马数字转换成 integer，
+input: String
+output: int
+
+```text
+Symbol       Value
+I             1
+V             5
+X             10
+L             50
+C             100
+D             500
+M             1000
+```
+
+有一个规则就是 如果 I 出现在 V 之前，那么就是 相当于 V - I 也就是 5 - 1 = 4
+同样的对于
+```text
+IV -> 4
+IX -> 9
+XL -> 40
+XC -> 90
+CD -> 400
+CM -> 900
+```
+
+**那么这道题的核心就是 我们只要发现一个 character 他所对应的数字比这个 character 之后一位 index 上的 character 对应的数字小，那么在 result 中就将这个 character 对应的数字减去**
+
+for example:
+```text
+result = 0
+XL = -10 + 50 = 40
+```
+
+```java
+class Solution {
+    public int romanToInt(String s) {
+        
+        Map<Character,Integer> map = new HashMap<>();
+        map.put('I',1);
+        map.put('V',5);
+        map.put('X',10);
+        map.put('L',50);
+        map.put('C',100);
+        map.put('D',500);
+        map.put('M',1000);
+
+        char[] arr = s.toCharArray();
+        int result = 0;
+        for(int i = 0;i<arr.length-1;i++){
+            if(map.get(arr[i]) < map.get(arr[i+1])){
+                result -= map.get(arr[i]);
+            }else{
+                result += map.get(arr[i]);
+            }
+        }
+
+        return result + map.get(arr[arr.length-1]);
+    }
+}
+```
 
 
