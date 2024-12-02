@@ -1,5 +1,6 @@
 这道题 依旧是让我们寻找 一个 BST path 其 sum 等于 target sum 但是让我们返回所有的符合的 path
 
+```java
     class Solution {
     List<List<Integer>> res;
     int sum;
@@ -35,3 +36,4 @@
 
     }
     }
+```

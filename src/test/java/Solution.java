@@ -59,6 +59,37 @@ public class Solution {
 //    1,2,7,0,9,10,0,3
 //          s
 
+        public int trap(int[] height) {
+            int[] rightMax = new int[height.length]; // the max height on the index right, including the index right
+            int[] leftMax = new int[height.length]; // the max height on the index left, including index i
+
+            int leftMaxHeight = height[0];
+            for(int i = 1;i<height.length;i++){
+                if(height[i] > leftMaxHeight){
+                    leftMax[i] = height[i];
+                    leftMaxHeight = height[i];
+                }else{
+                    leftMax[i] = leftMaxHeight;
+                }
+            }
+
+            int rightMaxHeight = height[height.length-1];
+            int result = 0;
+            for(int i = height.length-2;i>=0;i--){
+                if(height[i] > rightMaxHeight){
+                    rightMax[i] = height[i];
+                    rightMaxHeight = height[i];
+                }else{
+                    rightMax[i] = rightMaxHeight;
+                }
+
+                int sum = Math.min(leftMax[i],rightMax[i]) - height[i];
+                result += (sum > 0) ? sum : 0;
+            }
+
+            return result;
+        }
+
 
 
     public static void main(String[] args) {
@@ -68,9 +99,13 @@ public class Solution {
 //        System.out.println("simple" + 100 + 100);
 
 
-        int[] arr = new int[]{1,2,7,0,9,10,0};
+//        int[] arr = new int[]{1,2,7,0,9,10,0};
 
-        System.out.println(Arrays.toString(moveZeroToLeft(arr)));
+//        System.out.println(Arrays.toString(moveZeroToLeft(arr)));
+
+        int[] testcase1 = new int[]{0,1,0,2,1,0,1,3,2,1,2,1};
+        Solution solution    = new Solution();
+        System.out.println(solution.trap(testcase1));
 
     }
 }

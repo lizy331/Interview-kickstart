@@ -136,3 +136,20 @@ getNextCustomer() 返回下一个被 serve 的 customer
 follow up 你是否可以将 VIP 处理的 ratio 设置成为 regular customer 的两倍？
 
 
+### Nov 24, 2024 Amazon
+
+#### 
+
+题目：
+https://www.1point3acres.com/bbs/thread-904139-1-1.html
+
+
+参考思路 1：
+https://www.1point3acres.com/bbs/thread-776382-1-1.html
+
+参考思路 2：
+https://www.1point3acres.com/bbs/thread-888855-1-1.html
+
+
+
+

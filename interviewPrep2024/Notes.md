@@ -347,6 +347,8 @@ class Solution {
             wordFreq.put(word, wordFreq.getOrDefault(word, 0) + 1);
         }
 
+        // 这里的 start 是为了调整 sliding window 的起始位置，sliding window 起始点可以是 0->wordLength-1
+        // 后面的 sliding 部分会交给下面的 for 循环来处理
         for (int start = 0; start < wordLength; start++) {
             Map<String, Integer> windowMap = new HashMap<>();
             int left = start, count = 0;
@@ -362,6 +364,10 @@ class Solution {
                         String leftWord = s.substring(left, left + wordLength);
                         windowMap.put(leftWord, windowMap.get(leftWord) - 1);
                         left += wordLength;
+                        // 这个 while 循环的意义是在于，目前我们将 sub 添加进来之后发现, windowMap 中的 sub 超过了 wordFreq 当中这个 word 的 frequency
+                        // 也就是说 我们现在又添加了一次 sub，导致 sub 出现的次数太多了，那么我们需要通过挪动左指针 来将这个 sub 的 次数减小到合法
+                        // left 指针在移动的过程中，在某个时间点会指向 sub，此时 windowMap 就会将 sub 的 freq 减小 1，最终让我们的 sub 合法
+                        // 此时的这个 left 就是我们下一轮 sliding window 的起点
                         count--;
                     }
 
@@ -1224,6 +1230,29 @@ abba 是从两个 character 'bb' 开始向两遍衍生的，
 如果 这个 repeat char 出现在 left 之前那么 当前的 sliding window 就是 valid，如果 出现在 当前的 left 之后，那么我们需要更新当前的 left pointer 然后计算 当前 sliding window
  的 length
 
+```java
+class Solution {
+    public int lengthOfLongestSubstring(String s) {
+        Map<Character,Integer> map = new HashMap<>();
+        int i = 0;
+        int result = 0;
+        for(int j = 0;j<s.length();j++){
+            char c = s.charAt(j);
+            if(map.containsKey(c)){
+                // found duplicated, update window with duplicated
+                i = Math.max(i,map.get(c)+1);
+                map.put(c,j);
+            }else{
+                map.put(c,j);
+            }
+
+            result = Math.max(result,j-i+1);
+        }
+        return result;
+    }
+}
+```
+
 ### 424. Longest Repeating Character Replacement
 
 考点: sliding window
@@ -1466,7 +1495,7 @@ Y A
 P    
 ```
 也就是说 下一个第一行的 元素的 index 将会是 curIndex + numRows + (numRows - 2), 解释一下是因为numRows 从上往下，numRows - 2 是 中间的肚子的数量，从地下往上遍历的 元素的数量
-那么也就是说 一个周期的 元素的个数是 M =  numRows + (numRows - 2), 那么会有多少个这样的周期？ 一共会有 s.length()/M, 但是注意 如果 s 的 length 恰好是 M 的倍数的时候，我们会得到争取结果，但是 如果 s length 不是 M 的倍数的时候，最后一个周期将会被 skip 掉，**因为计算机计算int 的时候默认是向下取整的**
+那么也就是说 一个周期的 元素的个数是 M =  numRows + (numRows - 2), 那么会有多少个这样的周期？ 一共会有 s.length()/M, 但是注意 如果 s 的 length 恰好是 M 的倍数的时候，我们会得到正确结果，但是 如果 s length 不是 M 的倍数的时候，最后一个周期将会被 skip 掉，**因为计算机计算int 的时候默认是向下取整的**
 但是在这道题当中我们不能向下取整，因为即使最后一个周期的数量不完整，我们也需要将其计数下来，就比如说 example 当中 s length = 14, M = 6, 14/6 = 2 但是实际上 这个 zigzag 是经历了三个周期的
 
 ```text
@@ -2114,6 +2143,50 @@ class Solution {
 否则，我们得到的结果会是 2倍的 actual result，这是因为如果我们在 node==null 的时候 将 carry 加入到 result 那么 这个 node == null 可以来自左子树也可以来自右子树，所以我们会将结果计算两遍
 
 也可以使用 BFS，使用 BFS 的时候 我们需要注意使用 Pair，来记录 Treenode 以及 来自上一层的 carry
+
+
+### 124. Binary Tree Maximum Path Sum
+
+这道题让我们计算tree 当中 最大 pathsum 的 path
+
+```java
+class Solution {
+    public int result;
+    public int maxPathSum(TreeNode root) {
+        result = Integer.MIN_VALUE;
+        dfs(root);
+        return result;
+    }
+    public int dfs(TreeNode node){
+        if(node == null )return 0;
+
+        int leftMax = dfs(node.left);
+        int rightMax = dfs(node.right);
+
+        // leftMax+rightMax+node.val, leftMax + node.val, rightMax + node.val
+        int pathSum = node.val;
+        if(leftMax > 0){
+            pathSum += leftMax;
+        }
+        if(rightMax > 0){
+            pathSum += rightMax;
+        }
+
+        result = Math.max(pathSum,result);
+
+        // 注意在 return 的时候 我们需要 return node.val + LeftMax 或者 node.val + rightMax，因为我们需要返回的是 左枝或者右枝的其中之一
+        // 我们不能直接返回 pathSum，这会造成我们返回的是包含左右两支的子树
+     
+        if(leftMax < 0 && rightMax < 0){
+            return node.val;
+        }else{
+            return node.val + Math.max(leftMax,rightMax);
+        }
+
+    }
+}
+```
+
 
 ## Graph
 
@@ -3096,4 +3169,410 @@ class Solution {
 }
 ```
 
+T: O(n)
+S: O(1)
 
+#### 6. Zigzag Conversion
+
+这道题给了我们一个 String 和一个 numRows 让我们按照蛇形走位来从头开始先向下开始走 然后向上 开始走 然后周而复始
+
+```text
+Example 2:
+
+Input: s = "PAYPALISHIRING", numRows = 4
+Output: "PINALSIGYAHRPI"
+Explanation:
+P     I    N
+A   L S  I G
+Y A   H R
+P     I
+```
+
+这道题的解法最直接的就是 直接 按照规则进行 移动，我们可以使用一个 StringBuilder 的 array 来记录每一行对应的 的 character
+使用两个变量 一个叫做 boolean down 用来记录 当前的移动方向是向下的还是向上，使用另一个 变量叫做 curRow 用来记录当前的 row 是第几个，一旦 curRow == numRows 我们就将 方向变成 up 并且将 curRow--
+
+```text
+char c = s.charAt(i);
+
+stringbuilder[curRow].append(c)
+
+if down == true && curRow == numRow
+    curRow--;
+    down = false;
+
+if down == true && curRow < numRow
+    curRow++;
+
+if down == false && curRow < 1
+    curRow++;
+    down = true;
+    
+if down == false && curRow >= 1
+    curRow--;
+```
+
+下面是我写的代码 需要注意的细节就是，stringbuilder array 的 index 是 1 based 的
+
+```java
+class Solution {
+    public String convert(String s, int numRows) {
+        if(numRows==1) return s;
+        
+        StringBuilder[] sbs = new StringBuilder[numRows+1];
+        for(int i = 0;i<sbs.length;i++){
+            sbs[i] = new StringBuilder();
+        }
+
+        int curRow = 1;
+        boolean down = true;
+        for(int i = 0;i<s.length();i++){
+            sbs[curRow].append(s.charAt(i));
+
+            if(down && curRow==numRows){
+                curRow--;
+                down = false;
+            }else if(down && curRow< numRows){
+                curRow++;
+            }else if(down == false && curRow == 1){
+                curRow++;
+                down = true;
+            }else if(down == false && curRow > 1){
+                curRow--;
+            }
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for(int i = 1;i<sbs.length;i++){
+            sb.append(sbs[i]);
+        }
+
+        return sb.toString();
+    }
+}
+```
+
+
+#### 28. Find the Index of the First Occurrence in a String
+
+这道题 给了我们两个 string 一个叫做 haystack 另一个叫做 needle，让我们寻找 在 haystack 当中第一次出现 needle 的 index，如果没有 则返回 -1
+
+很自然的想法就是 遍历haystack 一旦我们发现当前的 index i 的 character 和 needle 的第一个 character 相等，那么我们就进入 needle 来判断 一整个 needle 是否存在于 haystack 当中
+
+```java
+class Solution {
+    public int strStr(String haystack, String needle) {
+        if(needle.length() > haystack.length()){
+            return -1;
+        }
+        for(int i = 0;i<haystack.length();i++){
+            if(haystack.charAt(i) == needle.charAt(0) && i+needle.length()<=haystack.length()){
+                if(haystack.substring(i,i+needle.length()).equals(needle)){
+                    return i;
+                }
+            }
+        }
+        return -1;
+    }
+}
+```
+
+这道题还有 KMP 解法
+
+
+#### 68. Text Justification
+
+
+这道题 给了我们一个 String array，和一个 maxWidth 让我们 rearrange 所有的 字符串 使得每一行不得超过 maxWidth
+每一个 字符串之间需要至少被一个 space 给隔开，如果某一行只有一个字符串或者当前这一行是最后一行那么我们 进行 left justify，也就是说所有的 字符串从左开始之间只隔了一个 space，多余的 space 加到右侧
+否则，多余的 space 需要 evenly 分配给 其他所有位置上的 spaces，如果无法实现 evenly，那么 我们需要 给左边安排更多的 space
+
+```text
+Example 1:
+
+Input: words = ["This", "is", "an", "example", "of", "text", "justification."], maxWidth = 16
+Output:
+[
+   "This    is    an",
+   "example  of text",
+   "justification.  "
+]
+Example 2:
+
+Input: words = ["What","must","be","acknowledgment","shall","be"], maxWidth = 16
+Output:
+[
+  "What   must   be",
+  "acknowledgment  ",
+  "shall be        "
+]
+Explanation: Note that the last line is "shall be    " instead of "shall     be", because the last line must be left-justified instead of fully-justified.
+Note that the second line is also left-justified because it contains only one word.
+Example 3:
+
+Input: words = ["Science","is","what","we","understand","well","enough","to","explain","to","a","computer.","Art","is","everything","else","we","do"], maxWidth = 20
+Output:
+[
+  "Science  is  what we",
+  "understand      well",
+  "enough to explain to",
+  "a  computer.  Art is",
+  "everything  else  we",
+  "do                  "
+]
+```
+
+
+我在做这道题的想法是首先判断每一行当中有哪些字符串是可以提取出来的，也就是使用一个 指针 j 来添加words[j] 的字符串长度，然后记录一下 curLineWordsLength，当前行 添加的 字符串的 数量就是 j-i，那么所需要的 spaces 也至少是 j-i
+那么就判断一下 当前 行添加了 words[j] 之后以及 所需要的 space 是否大于 maxWidth，如果超出 那么就结束 while 循环
+
+所以需要注意当跳出 while 循环的 时候 我们的 j 是不能添加的，真正可以添加的 字符串 是从 index i 到 index j-1
+
+接着分为两类来思考，需要 left justify 和情况以及 不需要 left justify 而是需要 进行 evenly place 的情况
+
+left justify 也就是当 当前行只有一个 字符串或者 当前行是最后一行
+
+```java
+class Solution {
+    public List<String> fullJustify(String[] words, int maxWidth) {
+        List<String> result = new ArrayList<>();
+        int i = 0;
+
+        while (i < words.length) {
+            int curLineWordsLength = 0; // 注意这里我们记录的是所有添加的 words 的长度 并不包括 spaces
+            int j = i;
+
+            // 计算当前行可以容纳的单词数量
+            while (j < words.length && curLineWordsLength + words[j].length() + (j - i) <= maxWidth) {
+                curLineWordsLength += words[j].length();
+                j++;
+            }
+
+            int numOfWords = j - i; // 实际上我们的可以添加到的 index 是 i -> j-1, 字符串数量是 (j-1-i+1) = j-i
+            int numOfPosForSpace = numOfWords - 1;
+            int extraSpaces = maxWidth - curLineWordsLength;
+            StringBuilder sb = new StringBuilder();
+
+            if (numOfWords == 1 || j == words.length) { // left justify 左对齐或最后一行
+                for (int k = i; k < j; k++) {
+                    sb.append(words[k]);
+                    if (k < j - 1) { // 每一行的最后一个单词之后是不添加 space 的
+                        sb.append(" ");
+                    }
+                }
+                // 补齐多余的空格
+                while (sb.length() < maxWidth) {
+                    sb.append(" ");
+                }
+            } else { // 完全对齐
+                int commonSpaces = extraSpaces / numOfPosForSpace; // 每一行至少需要添加的 space
+                int incommonSpaces = extraSpaces % numOfPosForSpace; // 从左到右每一个单词之后需要添加的多余的 space
+
+                for (int k = i; k < j - 1; k++) {
+                    sb.append(words[k]);
+                    if (incommonSpaces > 0) {
+                        sb.append(" "); // 分配额外空格
+                        incommonSpaces--;
+                    }
+                    sb.append(" ".repeat(commonSpaces));
+                }
+                sb.append(words[j - 1]); // 添加最后一个单词，单独拎出来的原因是最后一个单词 之后 是不添加 spaces
+            }
+
+            result.add(sb.toString());
+            i = j; // 更新起点，真正能够添加的 index 是 从 i -> j-1，所以我们只需要将 index i 更新为 j 就可以
+        }
+
+        return result;
+    }
+}
+
+```
+
+### Two Pointers
+
+#### 392. Is Subsequence
+
+这道题给了我们两个 string s 和 t，问我们在 t 中是否包含 s 的 subsequence？
+
+```text
+Example 1:
+
+Input: s = "abc", t = "ahbgdc"
+Output: true
+Example 2:
+
+Input: s = "axc", t = "ahbgdc"
+Output: false
+```
+
+这道题应该可以想得到使用 two pointers，也就是使用一个 index i 遍历 t，另一个 index j 遍历 s， 如果 s[j] == t[i] j++,i++
+如果 在 s[j] == t[i] && j == s.length-1 （**也就是 j 到达最后一位**） 那么直接返回 true
+
+```java
+class Solution {
+    public boolean isSubsequence(String s, String t) {
+        if(s.length() == 0) return true;
+        if(s.length() > t.length())return false;
+        if(s.length()==t.length())return s.equals(t);
+
+        int j = 0;
+        for(int i = 0;i<t.length();i++){
+            if(t.charAt(i)==s.charAt(j)){
+                if(j == s.length()-1){
+                    return true;
+                }
+                j++;
+            }
+        }
+
+        return false;
+    }
+}
+```
+
+Time: O(T*S)   T is the length of t, S is length of s
+Space: O(1)
+
+这道题还有一个 follow up 就是 如果我们现在有多个 s，s1, s2, s3 ,s4 ... sk 那么怎么解决？
+
+如果我们依然使用上面的解法，那么我们的时间复杂度将会是 Time: O(K*T*S), 当 s 和 t 的长度非常大的时候，时间复杂度将会非常的高
+
+**Solution 2:**
+我们可以使用 binary search + indexHashmap 的方法，建立一个关于 t 当中 所有 character 的 indexHashMap，（key:character, value:List<Index>）
+然后遍历 s 并且记录之前遍历到的 s 的 character 在 t 中的 “prevIndex”，然后我们在 indexHashMap 中寻找当前遍历到的 character 的List Index 中比这个  prevIndex 大的 index
+如果找到了那么久更新，如果没有找到则返回 -1
+
+```java
+class Solution{
+    public boolean isSubsequence(String s, String t){
+        if(s.length()==0)return true;
+        Map<Character,List<Integer>> map = new HashMap<>();
+        for(int i = 0;i<t.length();i++){
+            char c = t.charAt(i);
+            map.putIfAbsent(c, new ArrayList<>());
+            map.get(c).add(i);
+        }
+        
+        int prevIndex = -1;
+        for(int i = 0;i<s.length();i++){
+            char c = s.charAt(i);
+            if(!map.containsKey(c)){
+                return false;
+            }else{
+                List<Integer> indexs = map.get(c);
+                int searchIndex = binarySearch(indexs,prevIndex); // searching the index that is larger than prevIndex
+                if(searchIndex == -1){return false;}
+//                prevIndex = searchIndex; // ******* 这里错了
+                prevIndex = indexs.get(searchIndex); // searchIndex 是 binarySearch 返回的在 indexs list 当中比prevIndex 大的数字（实际上也是一个 index） 的 index
+            }
+        }
+        
+        return t.charAt(prevIndex) == s.charAt(s.length()-1);
+        
+    }
+    
+    public int binarySearch(List<Integer> nums, int target){
+        int left = 0;
+        int right = nums.size()-1;
+        while(left<=right){
+            int mid = (right-left)/2 + left;
+            if(nums.get(mid) <= target){ // we want the index that is just larger than target
+                left = mid + 1;
+            }else{
+                right = mid - 1; // we will always return left, so even right might be the answer, we will reduce
+            }
+        }
+        
+//        return nums.get(left) > target ? left : -1; // ******这里错了
+          return left < nums.size() ? left : -1; // 我们应该判断的是  left index 是否在 nums list 的范围内，因为只有在其范围内才是一个有效的，否则返回 -1 
+    }
+}
+```
+
+#### 15. 3Sum
+
+废话不多说 直接上代码，容易出错的地方在于 规避重复出现的 triplets，我们需要在三处特别注意
+
+第一个是在主循环动中 如果 当 nums[i] == nums[i-1]
+比如说
+
+```text
+-1, -1, -1, 1, 1, 2
+
+第一个 -1 和 第三个 -1 的所产生的 triplets 是相同的, 所以我们应该跳过，知道第三个 -1
+```
+
+其他的是在我们找到 sum = 0 的时候此时我们需要移动 left ++ right --，并且我们还需要判断移动之后的 num 是不重复的
+
+```java
+class Solution {
+    public List<List<Integer>> threeSum(int[] nums) {
+        List<List<Integer>> result = new ArrayList<>();
+        // sort the array
+        Arrays.sort(nums);
+
+        // for each index, use two sum find the other two index, skiped the repeated elements
+        for(int i = 0;i<nums.length-2;i++){
+            if(i>0 && nums[i] == nums[i-1]){
+                continue;
+            }
+            int left = i + 1;
+            int right = nums.length-1;
+            while(left < right){
+                int sum = nums[i] + nums[left] + nums[right];
+                if(sum == 0){
+                    List<Integer> candi = new ArrayList<>();
+                    candi.add(nums[i]);
+                    candi.add(nums[left]);
+                    candi.add(nums[right]);
+                    result.add(candi);
+                    left++;
+                    right--;
+                    while(left<right && nums[left] == nums[left-1]){
+                        left++;
+                    }
+                    while(left<right && nums[right] == nums[right+1]){
+                        right--;
+                    }
+                }else if(sum < 0){
+                    left++;
+                }else{
+                    right--;
+                }
+            }
+        }
+
+        return result;
+
+    }
+}
+```
+
+
+### Sliding Window
+
+#### 209. Minimum Size Subarray Sum
+
+这道题让我们寻找一个 subarray 其 sum 大于或等于 target，这样的一个可能存在的 subarray 的最小的长度是什么？
+
+sliding window 以后就按照这样写好了，一个 for loop 用来 扩展 window，另一个 while 用来 shrink 这个 window
+
+```java
+class Solution {
+    public int minSubArrayLen(int target, int[] nums) {
+        int windowSum = 0;
+        int i = 0;
+        int result = nums.length+1;
+        for(int j = 0;j<nums.length;j++){
+            windowSum += nums[j];
+            while(i<=j && windowSum >= target){
+                result = Math.min(j-i+1,result);
+                windowSum -= nums[i];
+                i++;
+            }
+        }
+
+        return result == nums.length+1 ? 0 : result;
+    }
+}
+```

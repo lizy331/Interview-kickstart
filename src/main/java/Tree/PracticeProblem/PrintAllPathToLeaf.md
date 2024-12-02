@@ -1,5 +1,7 @@
 这道题让我们 打印所有的 从 root 到 leaf node的path，并返回所有的 path
 
+```java
+class Solution{
     static ArrayList<ArrayList<Integer>> res;
     static ArrayList<ArrayList<Integer>> all_paths_of_a_binary_tree(BinaryTreeNode root) {
         // Write your code here.
@@ -32,6 +34,9 @@
         return;
         
     }
+}
+```
+
 
 **错误的想法：**
 注意和数组的 recursive 不一样的是 我们在 out 添加了一个node 总是要 back propagate，不像 数组的 recursive 只需要删除一次
