@@ -2254,6 +2254,95 @@ if(map.contains(node)){return;}
 
 ```
 
+### 994. Rotting Oranges
+
+这道题让我们 判断 多久所有的 orange 会被全部感染成为 rotten
+
+在写 BFS 的时候注意两个点 ，在判断边界的时候 只在 newX 和 newY 合理的时候进行操作  
+
+```java
+class Solution {
+    /**
+    input:
+    int[m][n]
+    0 empty
+    1 fresh
+    2 rotten
+
+    output:
+    # of rounds till all rotten
+
+    case 1: if all rotten -> -1
+    case 2: if all fresh, count fresh -> 0
+    case 3: after rotten, count how many rotten oranges, if rotten < fresh -> -1
+        else return result
+
+    step 1. loop the grid, count how many fresh, offer rotten oranges if any
+            if rotten == 0 -> 0
+            if fresh == 0 -> -1
+
+    step 2. bfs the grid, count how many steps, and how many oranges got rotten
+
+    step 3. if the rotten < fresh -> -1, else return result
+
+
+     */
+    public int orangesRotting(int[][] grid) {
+        int fresh = 0;
+
+        Queue<int[]> queue = new LinkedList<>();
+        int m = grid.length;
+        int n = grid[0].length;
+
+        for(int i = 0;i<m;i++){
+            for(int j = 0;j<n;j++){
+                if(grid[i][j] == 1){
+                    fresh++;
+                }else if(grid[i][j] == 2){
+                    queue.offer(new int[]{i,j});
+                }
+            }
+        }
+
+        if(fresh == 0){return 0;}
+
+        if(queue.size()==0){
+            return -1;
+        }
+
+        int[][] dirs = new int[][]{{-1,0},{1,0},{0,-1},{0,1}}; // up, down, left, right
+        int rotten = 0;
+        int result = 0;
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            for(int i = 0;i<size;i++){
+                int[] loc = queue.poll();
+                for(int[] dir : dirs){
+                    int newX = loc[0] + dir[0];
+                    int newY = loc[1] + dir[1];
+                    if(newX >= 0 && newY >= 0 && newX < m && newY < n && grid[newX][newY] == 1){
+                        queue.offer(new int[]{newX,newY});
+                        rotten++;
+                        grid[newX][newY] = 2;
+
+                    }
+                    
+
+                }
+            }
+            result++;
+        }
+
+        if(rotten < fresh){
+            return -1;
+        }
+
+        return result-1;
+
+    }
+}
+```
+
 ### 210. Course Schedule II
 
 考点 DFS
@@ -2411,7 +2500,7 @@ class Solution {
 minPrice[dst][k] 表示从起点 src 到节点 dst 在 k 次中转内的最低费用。
 
 
-## Dynamic Programing
+## Dynamic Programing 动态规划
 
 ### 139. Word Break
 
@@ -2484,6 +2573,106 @@ class Solution {
 
 因为如果 j == i，那么在 substring 当中就会是 s.substring(i,i) 此时substring 会返回空字符串，没有意义，（也就是说其实加上也可以）
 
+
+### 1235. Maximum Profit in Job Scheduling
+
+考点: dp binary search
+
+这道题 给了我们三个数组 startTime endTime profit，三个数组的长度都相同，对应的是 index i job 的信息，问我们在没有 job overlapping 的情况下 可以获得的最大 profit 是多少？
+
+![img_2.png](img_2.png)
+
+```text
+Input: startTime = [1,2,3,4,6], endTime = [3,5,10,6,9], profit = [20,20,100,70,60]
+Output: 150
+Explanation: The subset chosen is the first, fourth and fifth job. 
+Profit obtained 150 = 20 + 70 + 60.
+```
+
+
+求极值的动态规划
+
+```text
+dp[i]: max profit from job 0 to job i
+
+dp[i] = max(dp[i-1], profit[i] + dp[prev])
+prev 是上一个不和 job i 时间上重复的 job
+
+在每次决定 dp[i] 的时候判断是否选择当前的这个 job[i]
+
+dp[0] = job[0] profit
+
+[1,2,3,4,6]
+[3,5,10,6,9]
+[20,20,100,70,60]
+
+start,end, profit
+[1,3,20], [2,5,20], [3,10,100], [4,6,70], [6,9,60]
+
+how to find the prev?
+need to sort the job based on endTime, 
+
+and use binary search to find the job which endTime is just smaller or equal to the current job start time
+
+
+```
+
+```java
+class Solution {
+    public int jobScheduling(int[] startTime, int[] endTime, int[] profit) {
+        int n = startTime.length;
+        int[][] jobs = new int[n][3];
+
+        for(int i = 0;i<n;i++){
+            jobs[i][0] = startTime[i];
+            jobs[i][1] = endTime[i];
+            jobs[i][2] = profit[i];
+        }
+
+        Arrays.sort(jobs,(int[] a, int[] b) -> Integer.compare(a[1],b[1]));
+
+
+        int[] dp = new int[n];
+        dp[0] = jobs[0][2];
+
+        for(int i = 1;i<n;i++){
+            int currProfit = jobs[i][2];
+            int prev = binarySearch(jobs,i); // find the jobs, end time <= jobs[i] starttime
+
+            if(prev != -1){
+                currProfit += dp[prev];
+            }
+            dp[i] = Math.max(dp[i-1],currProfit);
+        }
+
+        return dp[n-1];
+    }
+
+    public int binarySearch(int[][] jobs, int index){
+        int left = 0;
+        int right = index-1;
+
+        while(left<=right){
+            int mid = (right-left)/2 + left;
+            if(jobs[mid][1] > jobs[index][0]){ // 如果 当前找到的 mid 的 endTime 大于 index job 的 start time 那说明 当前job 肯定被舍弃
+                right = mid - 1;
+            }else{
+                left = mid + 1;       // 当进入这个条件的时候 说明 mid 此时也是满足条件的，为什么我们还是将 left = mid + 1，因为 mid + 1 有可能 不满足条件
+            }
+        }
+        return right;        // 在什么条件下 right 会返回 -1
+    }
+}
+```
+
+###### 问题 1:
+当进入这个条件的时候 说明 mid 此时也是满足条件的，为什么我们还是将 left = mid + 1，因为 mid + 1 有可能 不满足条件, 因为我们必须要找到 最靠近 index 的job，即使 mid 也满足条件，我们还是移动指针向右
+如果移动left 向右 之后导致 job 不满足条件，最终也会通过 right - 1 给修正
+
+
+###### 问题 2:
+什么条件下 right 会返回 -1
+当所有的 previous jobs 都 和 index jobs 有时间冲突的时候 
 
 
 ## Top 150
@@ -3573,6 +3762,504 @@ class Solution {
         }
 
         return result == nums.length+1 ? 0 : result;
+    }
+}
+```
+
+#### 76. Minimum Window Substring
+
+考点: sliding window
+
+这道题最主要的是使用两个 hashmap 来 记录 两个 string 的 frequency
+
+一个 是 target word 的 character frequency, freqT
+另一个是用来记录 sliding window 当中的 character frequency
+
+我们需要使用一个 formed 数字用来记录当前 window 当中有多少 character 满足了 target word frequency，如果 formed = freqT.size() 那么说明当前 window 满足了包括所有 target word 当中的 character 以及 frequency 的条件
+
+此时我们就开始 shrinking 我们的 window
+，因为题目要求我们找到最小的 window，在shrink 的同时也需要对window 的 frequency map 进行修改
+
+```java
+class Solution {
+    public String minWindow(String s, String t) {
+        if (s == null || t == null || s.length() < t.length()) {
+            return "";
+        }
+        // step 1, build freqMap T
+        Map<Character,Integer> freqMapT = new HashMap<>();
+        for(int i = 0;i<t.length();i++){
+            char c = t.charAt(i);
+            freqMapT.put(c,freqMapT.getOrDefault(c,0)+1);
+        }
+
+        Map<Character,Integer> windowMap = new HashMap<>();
+        int formed = 0; // once formed == freqMap.size(), a possible result found!
+
+        int i = 0;
+        int[] range = new int[]{-1,-1};
+        int rangeSize = Integer.MAX_VALUE;
+        for(int j =0;j<s.length();j++){
+            char c = s.charAt(j);
+
+            if(freqMapT.containsKey(c)){
+                windowMap.put(c,windowMap.getOrDefault(c,0)+1);
+                if(windowMap.get(c).intValue() == freqMapT.get(c).intValue()){
+                    formed++;
+                }
+            }
+            while(formed==freqMapT.size()){
+                if (j - i + 1 < rangeSize) {
+                    range[0] = i;
+                    range[1] = j;
+                    rangeSize = j - i + 1;
+                }
+                char leftC = s.charAt(i);
+                if(windowMap.containsKey(leftC)){
+                    windowMap.put(leftC,windowMap.get(leftC)-1);
+                    if(windowMap.get(leftC) < freqMapT.get(leftC)){
+                        formed--;
+                    }
+                }
+                
+                i++;
+            }
+        }
+
+        return range[0] == -1 ? "" : s.substring(range[0],range[1]+1);
+
+    }
+}
+
+// input:
+// String s
+// String t
+// upper case? yes
+// duplicated char? yes
+
+// output:
+//     min substring of s, which contains all character in t
+
+// edge case:
+//     s<t -> ""
+//     s = "" -> "", impossible
+//     t contains char not in s -> ""
+
+// sol:
+//     // freqMapS
+//     freqMapT A:1, B:2, C:1
+//     windowMap
+
+//  s = "ADOBECODEBANC", t = "ABBC"
+                
+//       formed++     
+
+// 左指针是如何移动的，每次formed 满足条件之后，移动左指针一旦formed 不满足条件就停下来，这么做的道理是什么
+```
+
+左指针一旦 formed 满足条件 左指针就向右移动，移动到 formed 不满足条件为止，在此之前所有的 结果都是 满足条件的 ，所以需要进行记录
+
+
+### Matrix
+
+#### 36. Valid Sudoku
+
+这道题给了我们一个 9x9 的矩阵，让我们判断一下 这个 matrix 是否 valid，判断依据就是 同一行当中是否有重复的数字，同一列中 是否有同一个数字，同一个 3x3 的 九宫格当中是否同一个数字
+
+这道题 难点有两个，如何 判断是否有重复数字，以及 如何 定位 九宫格
+
+```java
+class Solution {
+    public boolean isValidSudoku(char[][] board) {
+        boolean[][] rowCheck = new boolean[9][9];
+        boolean[][] colCheck = new boolean[9][9];
+        boolean[][] boxCheck = new boolean[9][9];
+        int m = 9;
+        int n = 9;
+        for(int i = 0;i<m;i++){
+            for(int j = 0;j<n;j++){
+                char c = board[i][j];
+                if(c =='.'){continue;}
+                int num = c -'1'; // 1-9 -> 0-8, 九宫格的数字是 1 到 9, 所以我们是减去 '1' 而不是 '0'
+                int boxIndex = (i/3)*3 + j/3; // 定位 box，首先定位 第几行 i/3，然后定位第几列，boxIndex 的范围 是 0 - 8
+                if(rowCheck[i][num] || colCheck[j][num] || boxCheck[boxIndex][num]){
+                    return false;
+                }
+                rowCheck[i][num] = true;
+                colCheck[j][num] = true;
+                boxCheck[boxIndex][num] = true;
+            }
+        }
+        return true;
+    }
+}
+```
+
+#### 54. Spiral Matrix
+
+this question ask to traverse the matrix in a way that is in a rotation order, we need to set four points, x1, x2, y1, y2
+
+```text
+x1,y1     ->    x1,y2
+
+     ->  ...      |
+ |                v
+
+x2,y1     <-    x2,y2
+```
+
+```java
+class Solution {
+    public List<Integer> spiralOrder(int[][] matrix) {
+        int x1 = 0;
+        int x2 = matrix.length-1;
+        int y1 = 0;
+        int y2 = matrix[0].length-1;
+        List<Integer> result = new ArrayList<>();
+        while(x1<=x2 && y1<=y2){
+            for(int i = y1;i<=y2;i++){
+                result.add(matrix[x1][i]);
+            }
+
+            for(int i = x1+1;i<=x2;i++){
+                result.add(matrix[i][y2]);
+            }
+
+            // 从左到右 如果还有剩余行，此时我们才 往回走，如果 x1>=x2 那说明 就不用往回走了，只有一列之前已经走完了
+            if (x1 < x2) {
+                for (int i = y2 - 1; i >= y1; i--) {
+                    result.add(matrix[x2][i]);
+                }
+            }
+
+            // 从下到上（如果还有剩余列），同理
+            if (y1 < y2) {
+                for (int i = x2 - 1; i > x1; i--) {
+                    result.add(matrix[i][y1]);
+                }
+            }
+
+            x1++;
+            x2--;
+            y1++;
+            y2--;
+        }
+        return result;
+    }
+}
+
+// x1,y1       x1,y2
+
+
+// x2,y1       x2,y2
+```
+
+在写的时候需要考虑的一些点，需要保证 x1 <= x2 的，如果 x1 < x2 左右至少有三格，如果 x1 == x2 说明左右合并在了一起，说明只有一列
+
+同样的 y1 <= y2, 如果 y1 < y2 说明上下 是有空间的，如果 y1 == y2 说明上下合并在了一起，只有 一行
+
+#### 48. Rotate Image
+
+![img_3.png](img_3.png)
+
+这道题要求我们对 一个 matrix 进行 rotate，遇到 rotate，我们的直觉就是想一想 是否可以使用 reverse ，这道题也一样
+
+我们可以对每一行进行 reverse，然后 在对角线上进行 swap
+
+```text
+ 5  1  9  11
+ 2  4  8  10
+ 13 3  6  7
+ 15 14 12 16
+
+reverse each row
+
+ 11 9  1  5
+ 10 8  4  2
+ 7  6  3  13
+ 16 12 14 15
+ 
+ then swap diagnally
+```
+
+```java
+class Solution {
+ public void rotate(int[][] matrix) {
+  int m = matrix.length;
+  int n = matrix[0].length;
+  // reverse each row
+  for(int i = 0;i<m;i++){
+   int left = 0;
+   int right = n-1;
+   while(left<right){
+    int temp = matrix[i][left];
+    matrix[i][left] = matrix[i][right];
+    matrix[i][right] = temp;
+    left++;
+    right--;
+   }
+  }
+
+  // swap the number diagnally
+  for(int i =0;i<m;i++){
+   for(int j = 0;j<n-1-i;j++){
+    int temp = matrix[i][j];
+    matrix[i][j] = matrix[n-1-j][m-1-i];
+    matrix[n-1-j][m-1-i] = temp;
+   }
+  }
+ }
+}
+```
+
+注意虽然这道题 给的 matrix 是 nxn 的，但是如果 follow up 问到 如果 matrix 不是 正方形，那么上面的代码也可以 cover
+
+这道题的难点在于 swap diagnally 的时候我们需要 对 i,j 寻找对应的 diagonal location
+
+也就是 n-1-j, m-1-i
+
+```text
+ 11 9  1  5
+ 10 8  4  2
+ 7  6  3  13
+ 16 12 14 15
+ 
+ '9' 的坐标是 0,1 对应的对角线坐标为 '13' 2,3
+ 
+也就是 x: n-1-j => n-1-1 = 4 - 1 - 1 = 2
+      y: m-1-i => m-1-0 = 4 - 1 - 0 = 3
+ 
+```
+
+#### 73. Set Matrix Zeroes
+
+这道题 给了我们一个 matrix 告诉我们，如果矩阵中出现了 0，那么就把这个 坐标的同一列和同一行都变成 0
+
+我们可以使用第一列和第一行作为 一个信号表，如果matrix 当中出现了 0，那么就把这个 坐标对应的 第一列和第一行标记为 0
+比如
+```text
+1 2  3  4
+5 0  7  8
+9 10 11 12
+
+标记为
+1 0  3  4
+0 0  7  8
+9 10 11 12
+```
+
+最后我们在此遍历 matrix，根据这个 坐标的 第一列和第一行来判断是否将当前这个 坐标标记为 0
+
+这道题需要注意的点，就是第一行和第一列其本身是需要 特别的来判断的，不能说第一列出现了一个 0 那就把第一列整个标记为0，因为这个 0 可能是来自其他的 坐标将第一列标记为 0 的
+
+```java
+class Solution {
+    public void setZeroes(int[][] matrix) {
+        // if i,j == 0, matrix[0][j] = 0, matrix[i][0] = 0
+        boolean firstR = false;
+        boolean firstC = false;
+        for(int i = 0;i<matrix.length;i++){
+            for(int j = 0; j<matrix[0].length;j++){
+                if(matrix[i][j] == 0){
+                    if(i==0){firstR = true;}
+                    if(j==0){firstC = true;}
+                    matrix[0][j] = 0;
+                    matrix[i][0] = 0;
+                }
+            }
+        }
+        for(int i = 1;i<matrix.length;i++){
+            for(int j = 1; j<matrix[0].length;j++){
+                if(matrix[0][j] == 0 || matrix[i][0] == 0 ){
+                    matrix[i][j] = 0;
+                }
+            }
+        }
+        if(firstR){
+            for(int j = 0;j<matrix[0].length;j++){
+                matrix[0][j] = 0;
+            }
+        }
+
+        if(firstC){
+            for(int i = 0;i<matrix.length;i++){
+                matrix[i][0] = 0;
+            }
+        }
+    }
+}
+```
+
+#### 289. Game of Life
+
+这道题 给了我们一个 matrix 其中包含了 0 和 1，分别代表着 0 dead cell， 1 alive cell，
+
+让我们返回所有的 cell 的下一个状态，cell 状态的变换规则是
+
+```text
+1. Any live cell with fewer than two live neighbors dies as if caused by under-population.
+2. Any live cell with two or three live neighbors lives on to the next generation.
+3. Any live cell with more than three live neighbors dies, as if by over-population.
+4. Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
+```
+
+```java
+class Solution {
+    public void gameOfLife(int[][] board) {
+        int m = board.length;
+        int n = board[0].length;
+
+        // First pass: Mark the board with intermediate states
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                mark(board, i, j);
+            }
+        }
+
+        // Second pass: Update the board to the next state
+        for (int i = 0; i < m; i++) {
+            for (int j = 0; j < n; j++) {
+                if (board[i][j] == 2) {
+                    board[i][j] = 1; // Dead -> Alive
+                } else if (board[i][j] == -1) {
+                    board[i][j] = 0; // Alive -> Dead
+                }
+            }
+        }
+    }
+    public void mark(int[][] board, int i, int j) {
+        int[][] dirs = new int[][]{
+            {-1, 0}, {1, 0}, {0, -1}, {0, 1}, // Up, Down, Left, Right
+            {-1, -1}, {-1, 1}, {1, -1}, {1, 1} // Diagonals
+        };
+        int alive = 0;
+        // Count alive neighbors
+        for (int[] dir : dirs) {
+            int newX = i + dir[0];
+            int newY = j + dir[1];
+            if (newX < 0 || newY < 0 || newX >= board.length || newY >= board[0].length) {
+                continue;
+            }
+            if (board[newX][newY] == 1 || board[newX][newY] == -1) {
+                alive++;
+            }
+        }
+        
+        // 用 -1 和 2 分别表示“从活变死”和“从死变活”
+        // Apply the rules
+        if (board[i][j] == 1) { // Current cell is alive
+            if (alive < 2 || alive > 3) {
+                board[i][j] = -1; // Mark as Alive -> Dead
+            }
+        } else { // Current cell is dead
+            if (alive == 3) {
+                board[i][j] = 2; // Mark as Dead -> Alive
+            }
+        }
+    }
+}
+
+```
+
+
+#### 205. Isomorphic Strings
+
+这道题 给了我们两个 string s 和 t 让我们判断一下 这两个 string 是否满足相同的 pattern
+
+```java
+class Solution {
+    public boolean isIsomorphic(String s, String t) {
+        Map<Character,Character> map = new HashMap<>();
+        Map<Character,Boolean> used = new HashMap<>();
+
+        for(int i =0;i<s.length();i++){
+            char c1 = s.charAt(i);
+            char c2 = t.charAt(i);
+
+            if(map.containsKey(c1)){
+                if(map.get(c1)!= c2){
+                    return false;
+                }
+            }else{
+                if(used.containsKey(c2)){
+                    return false;
+                }
+
+                map.put(c1,c2);
+                used.put(c2,true);
+            }
+        }
+        return true; 
+    }
+}
+
+// eggg
+// addc
+```
+
+#### 202. Happy Number
+
+考点 hashmap, 将数字的每一位提取出来
+
+这道题 给了我们一个数字 让我们计算每一位上的 square 然后加起来，如果最后的结果 成为 1 了则返回 true
+
+这道题需要注意的是 如何将一个 数字的每一位都提取出来，也就是 先取 mode 然后 对自身除以 10
+
+```java
+class Solution {
+    public boolean isHappy(int n) {
+        if(n==1)return true;
+        Set<Integer> set =new HashSet();
+
+        while(set.add(n)){
+            int sum = 0;
+            while(n!=0){
+                sum += (n%10)*(n%10);
+                n /= 10;
+            }
+            n = sum;
+            if(sum == 1){return true;}
+        }
+
+        return false;
+        
+    }
+}
+```
+
+
+#### 128. Longest Consecutive Sequence
+
+考点 set
+
+注意的点，使用一个 set 检查 num-1 是否存在，如果不存在 ，说明 num 有可能是 一个连续递增 sequence 的头
+
+**注意我们在遍历的时候不要遍历数组，直接遍历 set**，因为 数组当中可能存在许多 duplicate
+
+```java
+class Solution {
+    public int longestConsecutive(int[] nums) {
+        Set<Integer> set = new HashSet();
+
+        for(int num : nums){
+            set.add(num);
+        }
+
+        int result = 0;
+        for(int num : set){
+            if(!set.contains(num-1)){
+                int candidate = num;
+                int temp = 0;
+                while(set.contains(candidate)){
+                    temp++;
+                    candidate = candidate + 1;
+                }
+                result = Math.max(result,temp);
+            }
+            
+        }
+
+        return result;
     }
 }
 ```
