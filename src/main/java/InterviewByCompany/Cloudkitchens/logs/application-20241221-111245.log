@@ -1,0 +1,8 @@
+Dec 21, 2024 11:12:45 AM InterviewByCompany.Cloudkitchens.OrderProducer <init>
+SEVERE: Order file does not exist at path: /Users/xinyidai/Documents/work/leetcode/src/main/java/acompany/CloudKitchens/orders.json
+Dec 21, 2024 11:12:45 AM InterviewByCompany.Cloudkitchens.KitchenOrderSystem main
+SEVERE: Failed to start OrderProducer: Order file does not exist at path: /Users/xinyidai/Documents/work/leetcode/src/main/java/acompany/CloudKitchens/orders.json
+java.io.IOException: Order file does not exist at path: /Users/xinyidai/Documents/work/leetcode/src/main/java/acompany/CloudKitchens/orders.json
+	at InterviewByCompany.Cloudkitchens.OrderProducer.<init>(CloudkitchensSolution.java:490)
+	at InterviewByCompany.Cloudkitchens.KitchenOrderSystem.main(CloudkitchensSolution.java:568)
+

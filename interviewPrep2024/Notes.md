@@ -996,6 +996,74 @@ prefixSum [1,0 ,2,5,9,14,20]
 我们维持一个单调递减的 monotonic stack, 每当有新的 比栈顶元素高的 temperature 出现的时候，就 pop 栈顶元素并记录天数
 
 
+### 1944. Number of Visible People in a Queue
+
+考点 monotonic stack
+
+向右看齐,
+
+```java
+class Solution {
+    public int[] canSeePersonsCount(int[] heights) {
+        Stack<Integer> stack = new Stack<>();
+        int n = heights.length;
+        int[] res = new int[n];
+        stack.push(heights[n-1]);
+
+        for(int i = n-2; i>=0;i--){
+            // case 1:
+            if(heights[i] < stack.peek()){
+                stack.push(heights[i]);
+                res[i] = 1;
+            }else{
+                // case 2:
+                while(!stack.isEmpty() && heights[i] > stack.peek()){
+                    stack.pop();
+                    res[i]++;
+                }
+                if(!stack.isEmpty()){
+                    res[i]++;
+                }
+                stack.push(heights[i]);
+            }
+        }
+
+        return res;
+    }
+}
+
+/**
+    input:10,6,8,5,11,9
+        index: 0 1 2 3  4 5  
+        i can see j, i < j
+        case1: a[i] > a[j] && a[i] higher than all pepole in between [i+1, j-1]
+            -> 10 8 1 7 
+               i.     j
+        case2: a[j] > a[i] && a[j] higher than all people in bewteen [i+1, j-1]
+
+        solution2:
+        input: 5,1,2,3,10
+        index: 0 1 2 3 4
+        result:4 1 1 1 0 
+                    <-
+        
+        input: 10,6,8,5,11,9
+        index:  0 1 2 3  4 5  
+        result: 3 1 2 1  1 0         
+                <-
+        st| 11 10
+        a[i] = 10
+        res[i] = 3
+        
+        step1: intial: res[n-1] = 0 and stack.push(a[n-1])
+        step2: loop right -> left [n-2, 0], maintain decreasing stack
+            case1: if a[i] < stack.top() -> st.push(a[i]) && res[i] = 1
+            case2: if a[i] > stack.top() -> stack.pop() && res[i] += 1 until stack.top() > a[i], then check stack empty
+                                                case2.1: if stack empty -> then stack.push(a[i])
+                                                case2.1: if stack not empty -> then stack.push(a[i]) && res[i] + 1
+                 
+ */
+```
 ## Stack
 
 ### 636. Exclusive Time of Functions
@@ -1347,6 +1415,71 @@ Space O(26)
 考点: 括号类 
 
 使用 stack 的时候 需要表达清楚 stack 当中储存的是什么，这档题当中 stack 储存 左括号的的 index
+
+```java
+/**
+1249. Minimum Remove to Make Valid Parentheses
+
+        Input: s = "lee(t(c)o)de)". -> "lee(t(c)o)de"
+    
+        index: 0 1 2 3 4 5 6
+        input: a ) b ( c ) d -> Output: "ab(c)d" 
+                           i
+        
+        index: 0 1 2 3 4 5 6 7
+        input: a ) b ( ( c ) d -> Output: "ab(c)d" 
+                 #   #
+                              i
+        
+        stack: 3
+
+        solution1: (better)
+        step1: loop str
+            case1: if letter -> continue
+            case2: if '(' -> add index to stack
+            case3: if ')' -> if stack is empty -> mark a[i] = #
+                             if stack is not empty -> pop()
+        
+        step2: loop stack -> mark a[i] = #
+        step3: loop char[] append a[i] if not #
+ */
+
+class Solution {
+
+
+    public String minRemoveToMakeValid(String s) {
+        Deque<Integer> stack = new LinkedList<>();
+        char[] chars = s.toCharArray();
+
+        for(int i = 0;i<chars.length;i++){
+            char c = chars[i];
+            if(c != '(' && c != ')'){continue;}
+            if(c == '('){
+                stack.push(i);
+            }else if(c == ')'){
+                if(stack.isEmpty()){
+                    chars[i] = '#';
+                }else{
+                    stack.pop();
+                }
+            }
+        }
+
+        while(!stack.isEmpty()){
+            chars[stack.pop()] = '#';
+        }
+
+        StringBuilder sb = new StringBuilder();
+        for(char c : chars){
+            if(c!= '#'){
+                sb.append(c);
+            }
+        }
+
+        return sb.toString();
+    }
+}
+```
 
 
 ### 165. Compare Version Numbers
@@ -1740,6 +1873,99 @@ class Solution {
 这种方式适用于我们知道 target 可能不存在于 array 当中的情况，**此时 输出的 left 就是 离 target 最近并且 大于 target 的元素的 index**
 
 
+### 981. Time Based Key-Value Store
+
+
+
+```java
+
+/**
+
+
+ data structure: 
+ Map<String,List<Object>>
+ key: key
+ value: List of Object with timestamp and value
+
+ set function:
+ case1: if key in map -> create new object add to list
+ case2: if key not exist -> cretae new entry            
+
+ get function:
+ case1: if key not exist in map -> return null
+ case2: if key exist in map -> Binary Search to list, find the largest smaller timestamp object
+ left: 0
+ right: list size - 1
+
+
+
+ Object {
+ int timestamp;
+
+ String value;
+ }
+
+
+ get()
+ 
+ */
+class TimeMap {
+
+    public Map<String,List<TimeObject>> map;
+    
+    class TimeObject {
+        int time;
+        String value;
+
+        public TimeObject(int t, String v){
+            this.time = t;
+            this.value = v;
+        }
+    }
+
+    public TimeMap() {
+        this.map = new HashMap<>();
+    }
+    
+    public void set(String key, String value, int timestamp) {
+        TimeObject obj = new TimeObject(timestamp,value);
+        if(!map.containsKey(key)){
+            map.put(key,new ArrayList<>());
+        }
+        map.get(key).add(obj);
+    }
+    
+    public String get(String key, int timestamp) {
+        if(!map.containsKey(key)){return "";}
+
+        List<TimeObject> list = map.get(key); 
+        int left = 0;
+        int right =list.size()-1;
+
+        while(left<=right){
+            int mid = (right-left)/2 + left;
+            int curTime = list.get(mid).time; 
+            if(curTime == timestamp){
+                return list.get(mid).value;
+            }else if(curTime > timestamp ){
+                right = mid - 1;
+            }else{
+                left = mid + 1;
+            }
+        }
+
+        return right >= 0 ? list.get(right).value : "";
+
+    }
+}
+```
+
+m: how many set opt
+Time: set() m + get() logm
+Space: m
+
+
+
 ### 1004. Max Consecutive Ones III
 
 考点: two pointer, sliding window
@@ -1988,6 +2214,110 @@ class Solution {
 
 ![img.png](img.png)
 
+Dec 28, 2024
+
+pr code
+```text
+level1:                      3
+          		          /        \
+level2:                  9          20
+                                  /      \
+level3:                          15        7
+
+
+Hashmap:
+key : x axis location,  -1, 0, 1….
+value : List of values
+
+
+high level: top-down + left-right
+queue: offer left first then right to make if same [row, col] then maintain left-right order
+BFS: <col , val> 
+node[col, val]
+left: [col - 1, val]
+right : [col+1, val]
+
+
+
+Step1: initialize
+Point{TreeNode, col}
+TreeMap<col, List<Integer>> map: key: col, value: list of node value from top-down and left-right order
+Queue<Point> queue: offer left first then right to make if same [row, col] then maintain left-right order
+minCol = 0
+maxCol = 0
+
+Step2: BFS level order traversal
+generate: Point cur 
+	minCol = min(curCol,minCol)
+	maxCol = max(curCol,maxCol)
+
+if left != null -> add to queue new Point(cur.left, col - 1)
+if right != null -> add to queue new Point(cur.right, col + 1)
+
+Terminate when queue is empty
+
+Step3: Loop between minCol maxCol, and add the relative entry to the result list
+ 
+```
+
+```java
+class Solution {
+
+    class Point{
+        int col;
+        TreeNode node;
+
+        public Point(int c, TreeNode n){
+            this.col = c;
+            this.node = n;
+        }
+    }
+
+    public Map<Integer,List<Integer>> map;
+    public List<List<Integer>> verticalOrder(TreeNode root) {
+        List<List<Integer>> result = new ArrayList<>();
+
+        if(root==null)return result;
+        map = new HashMap<>();
+        Point ori = new Point(0,root);
+        Queue<Point> queue = new LinkedList<>();
+        queue.offer(ori);
+        int minCol = 0;
+        int maxCol = 0;
+
+        while(!queue.isEmpty()){
+            int size = queue.size();
+            for(int i = 0;i<size;i++){
+                Point cur = queue.poll();
+                TreeNode curNode = cur.node;
+                int x = cur.col;
+                minCol = Math.min(x,minCol);
+                maxCol = Math.max(x,maxCol);
+                if(!map.containsKey(x)){
+                    map.put(x,new ArrayList<>());
+                }
+                map.get(x).add(curNode.val);
+
+                if(curNode.left!=null){
+                    queue.offer(new Point(x-1,curNode.left));
+                }
+                if(curNode.right!=null){
+                    queue.offer(new Point(x+1,curNode.right));
+                }
+            }
+        }
+
+
+        for(int i = minCol; i<=maxCol;i++){
+            if(map.containsKey(i)){
+                result.add(map.get(i));
+            }   
+        }
+
+        return result;
+    }
+}
+```
 
 ### 236. Lowest Common Ancestor of a Binary Tree
 
@@ -2133,6 +2463,70 @@ class Solution {
 我们需要两个 全局变量 firstNode 和 lastNode，因为我们最终需要的是一个环
 中序遍历的时候，如果我们遇见 lastNode 是 null 那么说明这个node 是我们的 firstNode，否则我们就将 当前 node.left 指向 lastNode，把 lastNode 的 right 指向当前 node
 
+三刷 Dec 28, 2024:
+
+```text
+        426. Convert Binary Search Tree to Sorted Doubly Linked List
+        e.g
+                4
+              /    \
+            2       5
+          /   \    
+         1     3    
+        null
+
+        1->2->3->4->5
+        1<-2<-3<-4<-5
+        
+        Binary Search Tree: in-order traversal
+        step1: initial
+        head = null
+        prev = null
+        cur  = root
+        step2: DFS: in-order traversal 
+            base case: cur == null -> return
+            recursion:
+                case1: head is not assigned (=null) -> assgin head: head = cur 
+                case2: head is been assigned (!= null) -> link prev and cur: prev.right = cur && cur.left = prev
+                prev = cur                                           
+        step3: link head and tail (prev)
+            prev.right = head head.left = prev
+            
+```
+
+```java
+
+class Solution {
+ public Node head;
+ public Node prev;
+ public Node treeToDoublyList(Node root) {
+
+  if(root == null)return null;
+  // step2
+  inorder(root);
+
+  head.left = prev;
+  prev.right = head;
+
+  return head;
+ }
+
+ public void inorder(Node cur){
+  if(cur == null){
+   return;
+  }
+  inorder(cur.left);
+  if(head == null){
+   head = cur;
+  }else{
+   prev.right = cur;
+   cur.left = prev;
+  }
+  prev = cur;
+  inorder(cur.right);
+ }
+}
+```
 ### 129. Sum Root to Leaf Numbers
 
 考点: DFS BFS
@@ -4197,6 +4591,8 @@ class Solution {
 // addc
 ```
 
+
+
 #### 202. Happy Number
 
 考点 hashmap, 将数字的每一位提取出来
@@ -4260,6 +4656,211 @@ class Solution {
         }
 
         return result;
+    }
+}
+```
+
+
+## 计算器问题
+
+### 227. Basic Calculator II
+
+```java
+
+/**
+        
+        e.
+        3 + 2 * 2
+                  i
+
+        step1: intial 
+            num: 0
+            prev: 4
+            lastSign: t
+            curSign: t
+            sum = 3  
+        step2: loop string      
+            case1: get numbers -> assign num
+            case2: when meet sign or i == n ('t')
+                if lastSign is +: sum += prev && prev = num
+                if lastSign is -: sum += prev && prev = -num
+                if lastSign is *: prev *= num
+                if lastSign is /: prev /= num
+                lastSign = curSign
+                num = 0
+        step3: result = sum + prev
+
+ */
+
+class Solution {
+    public int calculate(String s) {
+        int sum = 0;
+        int prev = 0;
+        int num = 0;
+        char lastSign = '+';
+
+        int n = s.length();
+        for(int i = 0;i<=n;i++){
+            char c =  i == n ? '#' : s.charAt(i);
+            if(c >='0' && c <= '9'){
+                num = num*10 + c-'0';
+                continue;
+            }
+
+            if(!Character.isDigit(c) && c != ' '){
+                if(lastSign == '+'){
+                    sum += prev;
+                    prev = num;
+                }else if(lastSign == '-'){
+                    sum += prev;
+                    prev = -num;
+                }else if(lastSign == '*'){
+                    prev *= num;
+                }else if(lastSign == '/'){
+                    prev /= num;
+                }
+
+                lastSign = c;
+                num = 0;
+            }
+        }
+
+        return sum + prev;
+        
+    }
+}
+```
+
+
+### 408. Valid Word Abbreviation
+
+考点 edge case
+
+```text
+408. Valid Word Abbreviation 
+        
+        word: s ubstitutio n
+        abbr: s10n
+
+        Invalid cases:
+        case1: abbr length > word length -> e.g. abbr: s10n, word: s
+        case2: abbr letters# + digit > word length -> e.g. abbr: s3n, word: snn
+        case3: abbr number start with 0 -> e.g. abbr: s01
+
+              0 12345678910 11
+        word: s ubstitutio  n
+                             j
+        abbr: s 10n
+                   i
+        num = num * 10 + (a[i] - '0') = 10
+        
+        two pointers loop two string: i < abbr.length && j < word.length
+            case1: if a[i] is letter
+                case1.1: if both chars and equal: a[i] == w[j] -> i++, j++
+                case1.2: if both chars and no equal: a[i] != w[j] -> return false
+            case2: if a[i] is number
+                case2.1: if a[i] is invalid numbers: abbr number start with 0 -> return false
+                case2.2: if a[i] is valid numbers -> then loop i until get entire num (i++) -> j += num; 
+        result: j == word.length && i == abbr.length
+```
+
+```java
+class Solution {
+    public boolean validWordAbbreviation(String word, String abbr) {
+        int i = 0;
+        int j = 0;
+
+        while(j<abbr.length() && i<word.length()){
+            char a = abbr.charAt(j);
+            if(Character.isLetter(a)){
+                if(word.charAt(i)==a){
+                    i++;
+                    j++;
+                    continue;
+                }else{
+                    return false;
+                }
+                
+            }else if(Character.isDigit(a)){
+                
+                if(a == '0'){return false;}
+                int num = 0;
+                while(j<abbr.length() && Character.isDigit(abbr.charAt(j))){
+                    num = num*10 + (abbr.charAt(j)-'0');
+                    j++;
+                }
+                i+=num;
+                if (i > word.length()) {
+                    return false;
+                }
+            }
+        }
+
+        return i == word.length() && j == abbr.length();
+    }
+}
+```
+
+
+### 523. Continuous Subarray Sum
+
+```text
+/** 523. Continuous Subarray Sum
+
+        good subarray
+        1. subarray size >= 2
+        2. sum of subarray: preSumDiff = n * k, n is [0, ..]
+
+
+        
+        k = 6
+        index: 0  1  2  3  4
+        input:23, 2, 4, 6, 7
+        preSu:23,25,29,35,42
+                    j
+                      0. 1.  2. 3.  4.  5
+        preSum:       0, 23, 25 29, 35, 42
+                          i
+        preSummodule: 0,  5, 1, 5,
+
+        solution1: For index i in preSumList, alculate if (curPreSum - preSum ) % k == 0 -> true -> O(n^2)
+
+        solution2: 
+        preSumDiff % k = (curPreSum - preSum) % k = 0
+        -> curPreSum % k = preSum % k -> mod
+
+        data structure: map
+        key: module
+        value: index
+        
+        step1: initial -> map.put(0, -1)
+        step2: loop array, maintain preSum -> calculate preSum module
+            case1: if module not in map, put(module, index)
+            case2: if module in map,
+                if i - map.get(key) >= 2 -> true, 
+                otherwise, continue
+     */
+```
+
+```java
+class Solution {
+    public boolean checkSubarraySum(int[] nums, int k) {
+        Map<Integer,Integer> map = new HashMap<>();
+        map.put(0,-1);
+        int presum = 0;
+        for(int i = 0;i<nums.length;i++){
+            presum += nums[i];
+            int mode = presum % k;
+            if(!map.containsKey(mode)){
+                map.put(mode,i);
+            }else{
+                if(i - map.get(mode) >=2){
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }
 ```
